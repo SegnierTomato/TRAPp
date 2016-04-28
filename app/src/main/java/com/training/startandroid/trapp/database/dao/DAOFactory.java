@@ -1,5 +1,6 @@
 package com.training.startandroid.trapp.database.dao;
 
+import com.training.startandroid.trapp.database.DBHelper;
 import com.training.startandroid.trapp.database.dao.impls.CatalogDAOImplSQLite;
 import com.training.startandroid.trapp.database.dao.impls.TranslationsWordDAOImplSQLite;
 import com.training.startandroid.trapp.database.dao.impls.WordsDAOImplSQLite;

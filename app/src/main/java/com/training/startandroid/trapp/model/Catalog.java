@@ -2,6 +2,7 @@ package com.training.startandroid.trapp.model;
 
 import android.media.Image;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -10,10 +11,11 @@ import java.util.List;
 public class Catalog {
 
     private int id;
+
     private String name;
     private Image image;
+    private Date date;
     private List<Word> listWords;
-
     public Catalog(int id, String name) {
         this.id = id;
         this.name = name;
@@ -35,6 +37,10 @@ public class Catalog {
 
     public int getId() {
         return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -59,5 +65,9 @@ public class Catalog {
 
     public void setImage(Image image) {
         this.image = image;
+    }
+
+    public Date getDate() {
+        return date;
     }
 }

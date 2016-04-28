@@ -13,6 +13,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.training.startandroid.trapp.database.DatabaseConnection;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
+//        DatabaseConnection.initializeConnection(getApplicationContext());
 
     }
 
@@ -100,5 +103,17 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onResume(){
+        DatabaseConnection.openConnection();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause(){
+        DatabaseConnection.closeConnection();
+        super.onPause();
     }
 }

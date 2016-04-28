@@ -1,5 +1,7 @@
 package com.training.startandroid.trapp.model;
 
+import java.util.Date;
+
 /**
  * Created by Администратор on 15.04.2016.
  */
@@ -8,6 +10,8 @@ public class TranslationOfWord {
     private int id;
     private String word;
     private String type_of_speech;
+    private Date date;
+
 
     public TranslationOfWord(int id, String word) {
         this.id = id;
@@ -39,5 +43,9 @@ public class TranslationOfWord {
 
     public int getId() {
         return id;
+    }
+
+    public Date getDate() {
+        return date;
     }
 }

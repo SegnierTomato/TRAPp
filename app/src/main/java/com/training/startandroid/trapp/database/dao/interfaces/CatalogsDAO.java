@@ -11,9 +11,9 @@ public interface CatalogsDAO {
 
     public void addCatalog(Catalog newCatalog);
 
-    public void updateCatalog(Catalog catalog);
+    public boolean updateCatalog(Catalog catalog);
 
-    public void removeCatalogById(int catalogId);
+    public boolean removeCatalogById(int catalogId);
 
     public List<Catalog> getAllCatalogs();
 

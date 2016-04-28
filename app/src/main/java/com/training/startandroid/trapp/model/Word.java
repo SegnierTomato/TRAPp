@@ -3,6 +3,7 @@ package com.training.startandroid.trapp.model;
 import android.media.Image;
 import android.provider.MediaStore;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -14,7 +15,10 @@ public class Word {
     private String word;
     private Image image;
     private MediaStore.Audio sound;
+    private Date date;
+
     private List<TranslationOfWord> translation_of_words_google;
+
     private List<TranslationOfWord> translation_of_words_yandex;
     private List<TranslationOfWord> translation_of_words_custom;
 
@@ -74,6 +78,10 @@ public class Word {
 
     public void setImage(Image image) {
         this.image = image;
+    }
+
+    public Date getDate() {
+        return date;
     }
 
     public List<TranslationOfWord> getTranslationOfWordsGoogle() {
