@@ -1,6 +1,7 @@
 package com.training.startandroid.trapp.database.dao.interfaces;
 
 import com.training.startandroid.trapp.model.Word;
+import com.training.startandroid.trapp.util.Constants;
 
 import java.util.List;
 
@@ -9,13 +10,22 @@ import java.util.List;
  */
 public interface WordsDAO {
 
-    public void addWord(Word newWord);
+    public Constants.ResultStatusDatabase addWord(Word newWord);
 
-    public void updateWord(Word word);
+    public boolean updateWord(Word word);
 
-    public void removeWordById(int wordId);
+    public boolean updateWordImage(Word word);
 
-    public Word getWordById(int wordsId);
+    public boolean updateWordSound(Word word);
 
-    public List<Word> getCatalogWordsByCatalogId(int catalogId);
+    public boolean removeWordsById(List<Integer> wordsId);
+
+    public List<Word> getCatalogWordsByCatalogId(final int catalogId);
+
+    public List<Word> getAllWords();
+
+    public int moveWords2Catalog(final int idNewCatalog, List<Word> listWords, final int idOldCatalog);
+
+    public int copyWords2Catalog(final int idNewCatalog, List<Word> listWords);
+
 }

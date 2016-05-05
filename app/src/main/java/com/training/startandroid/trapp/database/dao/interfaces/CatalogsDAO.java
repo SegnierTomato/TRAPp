@@ -1,6 +1,7 @@
 package com.training.startandroid.trapp.database.dao.interfaces;
 
 import com.training.startandroid.trapp.model.Catalog;
+import com.training.startandroid.trapp.util.Constants;
 
 import java.util.List;
 
@@ -9,11 +10,13 @@ import java.util.List;
  */
 public interface CatalogsDAO {
 
-    public void addCatalog(Catalog newCatalog);
+    public Constants.ResultStatusDatabase addCatalog(Catalog newCatalog);
 
-    public boolean updateCatalog(Catalog catalog);
+    public boolean updateCatalogName(Catalog catalog);
 
-    public boolean removeCatalogById(int catalogId);
+    public boolean updateCatalogImage(Catalog catalog);
+
+    public boolean removeCatalogById(final int catalogId);
 
     public List<Catalog> getAllCatalogs();
 

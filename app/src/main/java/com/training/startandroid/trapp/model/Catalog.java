@@ -13,26 +13,30 @@ public class Catalog {
     private int id;
 
     private String name;
-    private Image image;
+    private String imagePath;
     private Date date;
     private List<Word> listWords;
-    public Catalog(int id, String name) {
+
+    public Catalog(int id, String name, Date date) {
         this.id = id;
         this.name = name;
+        this.date = date;
     }
 
-    public Catalog(int id, String name, List<Word> listWords) {
+    public Catalog(int id, String name, List<Word> listWords, Date date) {
         this.id = id;
         this.name = name;
         this.listWords = listWords;
+        this.date = date;
     }
 
-    public Catalog(int id, String name, List<Word> listWords, Image image) {
-        this.id = id;
+    public Catalog(int id, String name, List<Word> listWords, Date date, String imagePath) {
 
+        this.id = id;
         this.name = name;
         this.listWords = listWords;
-        this.image = image;
+        this.date = date;
+        this.imagePath = imagePath;
     }
 
     public int getId() {
@@ -59,12 +63,12 @@ public class Catalog {
         this.listWords = words;
     }
 
-    public Image getImage() {
-        return image;
+    public String getImagePath() {
+        return imagePath;
     }
 
-    public void setImage(Image image) {
-        this.image = image;
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
     public Date getDate() {

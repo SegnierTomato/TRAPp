@@ -7,7 +7,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
+import com.training.startandroid.trapp.database.interfaces.CursorConverter;
 import com.training.startandroid.trapp.util.Constants;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -26,11 +31,23 @@ public class DBHelper extends SQLiteOpenHelper {
         super(context, Constants.DB_SQLITE_NAME, factory, Constants.DB_VERSION);
     }
 
+    public static File fileLoader(String path) {
+
+        File file = new File(path);
+
+//        getExternalStorageState()
+        if (file.canRead()) {
+
+
+            file.getAbsoluteFile();
+            return null;
+        }
+        return null;
+    }
 
     public void open() {
         sqLiteDatabase = getWritableDatabase();
     }
-
 
     public void close() {
         if (sqLiteDatabase.isOpen()) {
@@ -73,58 +90,81 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
+    public Object executeSelectQuery(final String query, String[] parameter, CursorConverter converter) {
 
-    public void executeSelectQuery() {
-
-        Cursor cursor = sqLiteDatabase.query(Constants.SQLITE_SELECT_QUERY_FROM_TABLE_CATALOGS);
+        /**
+         *  Usually I must using method query without rawQuery
+         */
+        Cursor cursor = sqLiteDatabase.rawQuery(query, parameter);
+        return converter.convert(cursor);
 
     }
 
-    public int executeUpdateDeleteQuery(Constants.ActionStatement actionStatement, Object[] parameters) {
+    public int executeUpdateDeleteQuery(Constants.ActionStatement actionStatement, Object[][] parameters) {
 
         try {
             sqLiteDatabase.beginTransaction();
             SQLiteStatement preparedStatement = sqLiteDatabase.compileStatement(StatementBuilder.getStatement(actionStatement));
 
-            for (int i=0;i<parameters.length;i++) {
-                if(parameters[i] instanceof String){
-                    preparedStatement.bindString(i+1, (String) parameters[i]);
-                }
-                else if(parameters[i] instanceof Integer){
-                    preparedStatement.bindLong(i+1, (Integer)parameters[i]);
-                }
+            int count = 0;
+
+            for (Object[] oneRowParam : parameters) {
+                preparedStatement.clearBindings();
+                bindingParametersInPreparedStatement(preparedStatement, oneRowParam);
+                count += preparedStatement.executeUpdateDelete();
             }
 
-            int count = preparedStatement.executeUpdateDelete();
             sqLiteDatabase.setTransactionSuccessful();
 
             return count;
 
         } catch (Exception ex) {
             Log.e(ERROR_TAG, ex.toString());
+            return -1;
         } finally {
             sqLiteDatabase.endTransaction();
         }
-        return -1;
+
     }
 
-    public int executeInsertQuery(Constants.ActionStatement actionStatement, Object[] parameters) {
+    public List<Integer> executeInsertQuery(Constants.ActionStatement actionStatement, Object[][] parameters) {
 
         try {
             sqLiteDatabase.beginTransaction();
-
             SQLiteStatement preparedStatement = sqLiteDatabase.compileStatement(StatementBuilder.getStatement(actionStatement));
-            long id = preparedStatement.executeInsert();
+
+            long id;
+            List<Integer> listInsertId = new ArrayList<>(parameters.length);
+
+            for (Object[] oneRowParam : parameters) {
+                preparedStatement.clearBindings();
+                bindingParametersInPreparedStatement(preparedStatement, parameters);
+                id = preparedStatement.executeInsert();
+                listInsertId.add(Integer.valueOf((int) id));
+            }
             sqLiteDatabase.setTransactionSuccessful();
 
-            return (int) id;
+            return listInsertId;
 
         } catch (Exception ex) {
             Log.e(ERROR_TAG, ex.toString());
+            return null;
         } finally {
             sqLiteDatabase.endTransaction();
         }
-        return -1;
+
+    }
+
+    private void bindingParametersInPreparedStatement(SQLiteStatement preparedStatement, Object[] parameters) {
+
+        for (int i = 0; i < parameters.length; i++) {
+
+            if (parameters[i] instanceof String) {
+                preparedStatement.bindString(i + 1, (String) parameters[i]);
+            } else if (parameters[i] instanceof Integer) {
+                preparedStatement.bindLong(i + 1, (Integer) parameters[i]);
+            }
+        }
     }
 
 }

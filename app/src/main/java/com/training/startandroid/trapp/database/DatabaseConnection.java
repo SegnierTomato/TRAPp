@@ -13,8 +13,6 @@ public class DatabaseConnection {
     private DatabaseConnection() {
     }
 
-    ;
-
     public static synchronized void initializeConnection(Context context) {
         if (dbHelper == null) {
             dbHelper = new DBHelper(context);

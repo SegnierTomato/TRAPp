@@ -11,71 +11,72 @@ import com.training.startandroid.trapp.util.Constants;
 public class StatementBuilder {
 
     private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_CATALOGS = "INSERT INTO catalogs (name) VALUES (?)";
-
     private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_CATALOG_IMAGE = "INSERT INTO catalogs (id_catalog, image_path) VALUES (?,?)";
 
-
     private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_WORDS = "INSERT INTO words (word) VALUES (?)";
-
     private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_WORD_IMAGE = "INSERT INTO word_image (id_word, image_path) VALUES (?,?)";
-
     private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_WORD_SOUND = "INSERT INTO word_sound (id_word, sound_path) VALUES (?,?)";
-
 
     private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_CATALOGS_AND_WORDS_RELATIONS = "INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (?,?)";
 
 
     private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_TRANSLATE_WORDS_WITHOUT_PART_OF_SPEECH = "INSERT INTO translate_words (translate_word) VALUES (?)";
-
     private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_TRANSLATE_WORDS_WITH_PART_OF_SPEECH = "INSERT INTO translate_words (translate_word, part_of_speech) VALUES (?,?)";
 
     private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_GOOGLE_TRANSLATE = "INSERT INTO google_translate (id_word, id_translate) VALUES (?,?)";
-
     private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_YANDEX_TRANSLATE = "INSERT INTO yandex_translate (id_word, id_translate) VALUES (?,?)";
-
     private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_CUSTOM_TRANSLATE = "INSERT INTO custom_translate (id_word, id_translate) VALUES (?,?)";
 
-
     private static final String SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_CATALOGS = "DELETE FROM catalogs WHERE id_catalog = ?";
-
-    private static final String SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_CATALOG_IMAGE = "DELETE FROM catalog_image WHERE id_catalog = ?";
-
-
     private static final String SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_WORDS = "DELETE FROM words WHERE id_word = ?";
-
-    private static final String SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_WORD_IMAGE = "DELETE FROM word_image WHERE id_word = ?";
-
-    private static final String SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_WORD_SOUND = "DELETE FROM word_sound WHERE id_word = ?";
 
     private static final String SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_CATALOGS_AND_WORDS_RELATIONS = "DELETE FROM catalogs_and_words_relations WHERE id_catalog = ? AND id_word = ?";
 
     private static final String SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_TRANSLATE_WORDS = "DELETE FROM translate_words WHERE id_translate = ?";
+    private static final String SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_CATALOG_IMAGE = "DELETE FROM catalog_image WHERE id_catalog = ?";
 
-
+    private static final String SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_WORD_IMAGE = "DELETE FROM word_image WHERE id_word = ?";
+    private static final String SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_WORD_SOUND = "DELETE FROM word_sound WHERE id_word = ?";
     private static final String SQLITE_STATEMENT_UPDATE_TABLE_CATALOGS = "UPDATE catalogs SET name = ? where id_catalog = ?";
+    private static final String SQLITE_STATEMENT_UPDATE_TABLE_CATALOG_IMAGE = "UPDATE catalog_image SET image_path = ? where id_catalog = ?";
     private static final String SQLITE_STATEMENT_UPDATE_TABLE_WORDS = "UPDATE words SET word = ? where id_word = ?";
+    private static final String SQLITE_STATEMENT_UPDATE_TABLE_WORD_IMAGE = "UPDATE word_image SET image_path = ? where id_word = ?";
+    private static final String SQLITE_STATEMENT_UPDATE_TABLE_WORD_SOUND = "UPDATE word_sound SET sound_path = ? where id_word = ?";
+
+
 
 
     public static String getStatement(Constants.ActionStatement actionStatement) {
 
         switch (actionStatement) {
+
             case INSERT_NEW_CATALOG:
                 return SQLITE_STATEMENT_INSERT_IN_TABLE_CATALOGS;
 
             case INSERT_NEW_WORD:
-                break;
+                return SQLITE_STATEMENT_INSERT_IN_TABLE_WORDS;
+
 
             case INSERT_NEW_TRANSLATE:
                 break;
 
             case INSERT_NEW_CATALOG_AND_WORD_RELATION:
-                break;
+                return SQLITE_STATEMENT_INSERT_IN_TABLE_CATALOGS_AND_WORDS_RELATIONS;
+
+            case INSERT_NEW_CATALOG_IMAGE:
+                return SQLITE_STATEMENT_INSERT_IN_TABLE_CATALOG_IMAGE;
+
+            case INSERT_NEW_WORD_IMAGE:
+                return SQLITE_STATEMENT_INSERT_IN_TABLE_WORD_IMAGE;
+
+            case INSERT_NEW_WORD_SOUND:
+                return SQLITE_STATEMENT_INSERT_IN_TABLE_WORD_SOUND;
 
             case DELETE_CATALOG:
-                break;
+                return SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_CATALOGS;
 
             case DELETE_WORD:
-                break;
+                return SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_WORDS;
 
             case DELETE_TRANSLATED_WORD:
                 break;
@@ -85,11 +86,38 @@ public class StatementBuilder {
 
             case DELETE_YANDEX_TRANSLATE:
                 break;
+
             case DELETE_CUSTOM_TRANSLATE:
                 break;
 
-            case UPDATE_CATALOGS:
+
+            case DELETE_WORD_IMAGE:
+                return SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_WORD_IMAGE;
+
+            case DELETE_WORD_SOUND:
+                return SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_WORD_SOUND;
+
+            case DELETE_CATALOG_IMAGE:
+                return SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_CATALOG_IMAGE;
+
+            case DELETE_RELATIONS_BETWEEN_CATALOG_AND_WORD:
+                return SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_CATALOGS_AND_WORDS_RELATIONS;
+
+            case UPDATE_CATALOG_NAME:
                 return SQLITE_STATEMENT_UPDATE_TABLE_CATALOGS;
+
+            case UPDATE_CATALOG_IMAGE:
+                return SQLITE_STATEMENT_UPDATE_TABLE_CATALOG_IMAGE;
+
+            case UPDATE_WORD:
+                return SQLITE_STATEMENT_UPDATE_TABLE_WORDS;
+
+            case UPDATE_WORD_IMAGE:
+                return SQLITE_STATEMENT_UPDATE_TABLE_WORD_IMAGE;
+
+            case UPDATE_WORD_SOUND:
+                return SQLITE_STATEMENT_UPDATE_TABLE_WORD_SOUND;
+
         }
         return null;
     }
