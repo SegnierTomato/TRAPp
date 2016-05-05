@@ -158,15 +158,53 @@ public final class Constants {
         INSERT_NEW_WORD,
         INSERT_NEW_TRANSLATE,
         INSERT_NEW_CATALOG_AND_WORD_RELATION,
+        INSERT_NEW_CATALOG_IMAGE,
+        INSERT_NEW_WORD_IMAGE,
+        INSERT_NEW_WORD_SOUND,
+
         DELETE_CATALOG,
         DELETE_WORD,
         DELETE_TRANSLATED_WORD,
         DELETE_GOOGLE_TRANSLATE,
         DELETE_YANDEX_TRANSLATE,
         DELETE_CUSTOM_TRANSLATE,
-        UPDATE_CATALOGS
+
+        DELETE_WORD_IMAGE,
+        DELETE_WORD_SOUND,
+
+        DELETE_CATALOG_IMAGE,
+
+        DELETE_RELATIONS_BETWEEN_CATALOG_AND_WORD,
+
+        UPDATE_CATALOG_NAME,
+        UPDATE_CATALOG_IMAGE,
+        UPDATE_WORD,
+        UPDATE_WORD_IMAGE,
+        UPDATE_WORD_SOUND,
+
+
     }
 
-    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_CATALOGS = "SELECT * FROAM catalogs";
+    public enum ResultStatusDatabase{
+        ADD_SUCCESSFUL,
+        CAN_NOT_ADD_RECORD,
+        CAN_NOT_ADD_IMAGE,
+        CAN_NOT_ADD_SOUND,
+        CAN_NOT_ADD_IMAGE_AND_SOUND
+    }
+
+
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_CATALOGS_AND_WORDS_RELATIONS = "SELECT id_word FROM catalogs_and_words_relations WHERE id_catalog=?";
+
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_CATALOGS = "SELECT * FROM catalogs";
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_CATALOG_IMAGE = "SELECT * FROM catalog_image";
+
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORDS_BY_ID_WORD = "SELECT * FROM words WHERE id_word=?";
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORD_IMAGE_BY_ID_WORD = "SELECT image_path FROM word_image WHERE id_word=?";
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORD_SOUND_BY_ID_WORD = "SELECT sound_path FROM word_sound WHERE id_word=?";
+
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORDS = "SELECT * FROM words";
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORD_IMAGE = "SELECT * FROM word_image";
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORD_SOUND = "SELECT * FROM word_sound";
 
 }
