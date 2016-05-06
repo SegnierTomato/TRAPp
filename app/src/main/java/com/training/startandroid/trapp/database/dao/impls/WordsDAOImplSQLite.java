@@ -20,6 +20,7 @@ import java.util.Set;
 /**
  * Created by Администратор on 16.04.2016.
  */
+
 public class WordsDAOImplSQLite implements WordsDAO {
 
     @Override
@@ -111,7 +112,7 @@ public class WordsDAOImplSQLite implements WordsDAO {
 
         Object[][] parameters = new Object[wordsId.size()][];
 
-        for(int i=0;i<wordsId.size();i++) {
+        for (int i = 0; i < wordsId.size(); i++) {
             parameters[i] = new Object[]{wordsId.get(i)};
         }
         return updateDeleteWord(Constants.ActionStatement.DELETE_WORD, parameters);
@@ -166,26 +167,17 @@ public class WordsDAOImplSQLite implements WordsDAO {
         CursorConverter imageSoundConverter = new ImageSoundConverter();
 
         Map<Integer, String> listWordsPath = (Map<Integer, String>) dbHelper.executeSelectQuery(Constants.SQLITE_SELECT_QUERY_FROM_TABLE_WORD_IMAGE, null, imageSoundConverter);
-        assignedWordImagesOrSoundsPath(listAllWords, listWordsPath);
+        assignedWordsImagesOrSoundsPath(listAllWords, listWordsPath);
 
         listWordsPath = (Map<Integer, String>) dbHelper.executeSelectQuery(Constants.SQLITE_SELECT_QUERY_FROM_TABLE_WORD_SOUND, null, imageSoundConverter);
-        assignedWordImagesOrSoundsPath(listAllWords, listWordsPath);
+        assignedWordsImagesOrSoundsPath(listAllWords, listWordsPath);
 
         return listAllWords;
     }
 
     @Override
     public int moveWords2Catalog(int idNewCatalog, List<Word> listWords, int idOldCatalog) {
-
-        /**
-         * This note actual for methods moveWords2Catalog and copyWords2Catalog
-         *
-         *  Think about using transaction
-         *  Re-write DBHelper.executeUpdateDelete method: add List<Word> for inserting
-         *  and deleting data in Database.
-         *
-         */
-
+        
         int result = copyWords2Catalog(idNewCatalog, listWords);
 
         if (result == -1) {
@@ -221,7 +213,7 @@ public class WordsDAOImplSQLite implements WordsDAO {
 
     }
 
-    private boolean assignedWordImagesOrSoundsPath(List<Word> listWords, Map<Integer, String> paths) {
+    private boolean assignedWordsImagesOrSoundsPath(List<Word> listWords, Map<Integer, String> paths) {
 
         try {
             Iterator<Word> iterator = listWords.iterator();
@@ -291,7 +283,7 @@ class WordConverter implements CursorConverter {
             word = new Word(cursor.getInt(0), cursor.getString(1), ConvertString2Date.convert(cursor.getString(2)));
 
         } catch (Exception ex) {
-            word = new Word(-1, "", null);
+            word = new Word(-1, null, null);
         } finally {
             cursor.close();
         }

@@ -21,6 +21,21 @@ public class Word {
     private List<TranslationOfWord> translation_of_words_yandex;
     private List<TranslationOfWord> translation_of_words_custom;
 
+    public Word(String word) {
+        this.word = word;
+    }
+
+    public Word(final String word, final String imagePath) {
+        this.word = word;
+        this.imagePath = imagePath;
+    }
+
+    public Word(String word, final String imagePath, final String soundPath) {
+        this.word = word;
+        this.imagePath = imagePath;
+        this.soundPath = soundPath;
+    }
+
     public Word(int id, String word, Date date) {
         this.id = id;
         this.word = word;

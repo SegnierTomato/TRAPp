@@ -156,14 +156,20 @@ public final class Constants {
     public enum ActionStatement {
         INSERT_NEW_CATALOG,
         INSERT_NEW_WORD,
-        INSERT_NEW_TRANSLATE,
         INSERT_NEW_CATALOG_AND_WORD_RELATION,
         INSERT_NEW_CATALOG_IMAGE,
         INSERT_NEW_WORD_IMAGE,
         INSERT_NEW_WORD_SOUND,
 
+        INSERT_NEW_TRANSLATE_WITH_PART_OF_SPEECH,
+        INSERT_NEW_TRANSLATE_WITHOUT_PART_OF_SPEECH,
+        INSERT_NEW_GOOGLE_TRANSLATE,
+        INSERT_NEW_YANDEX_TRANSLATE,
+        INSERT_NEW_CUSTOM_TRANSLATE,
+
         DELETE_CATALOG,
         DELETE_WORD,
+
         DELETE_TRANSLATED_WORD,
         DELETE_GOOGLE_TRANSLATE,
         DELETE_YANDEX_TRANSLATE,
@@ -182,6 +188,8 @@ public final class Constants {
         UPDATE_WORD_IMAGE,
         UPDATE_WORD_SOUND,
 
+        UPDATE_TRANSLETED_WORD
+
 
     }
 
@@ -193,6 +201,11 @@ public final class Constants {
         CAN_NOT_ADD_IMAGE_AND_SOUND
     }
 
+    public enum SpecificDictionary{
+        GOOGLE_DICTIONARY,
+        YANDEX_DICTIONARY,
+        CUSTOM_DICTIONARY
+    }
 
     public static final String SQLITE_SELECT_QUERY_FROM_TABLE_CATALOGS_AND_WORDS_RELATIONS = "SELECT id_word FROM catalogs_and_words_relations WHERE id_catalog=?";
 
@@ -207,4 +220,14 @@ public final class Constants {
     public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORD_IMAGE = "SELECT * FROM word_image";
     public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORD_SOUND = "SELECT * FROM word_sound";
 
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_GOOGLE_TRANSLATE = "SELECT id_translate FROM google_translate";
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_YANDEX_TRANSLATE = "SELECT id_translate FROM yandex_translate";
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_CUSTOM_TRANSLATE = "SELECT id_translate FROM custom_translate";
+
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_GOOGLE_TRANSLATE_BY_ID_WORD = "SELECT id_translate FROM google_translate WHERE id_word=?";
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_YANDEX_TRANSLATE_BY_ID_WORD = "SELECT id_translate FROM yandex_translate WHERE id_word=?";
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_CUSTOM_TRANSLATE_BY_ID_WORD = "SELECT id_translate FROM custom_translate WHERE id_word=?";
+
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_TRANSLATED_WORDS = "SELECT * FROM translate_words";
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_TRANSLATED_WORDS_BY_ID_WORD = "SELECT * FROM translate_words WHERE id_translate =?";
 }

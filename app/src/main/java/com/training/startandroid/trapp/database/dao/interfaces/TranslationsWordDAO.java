@@ -1,6 +1,7 @@
 package com.training.startandroid.trapp.database.dao.interfaces;
 
 import com.training.startandroid.trapp.model.TranslationOfWord;
+import com.training.startandroid.trapp.util.Constants;
 
 import java.util.List;
 
@@ -9,20 +10,20 @@ import java.util.List;
  */
 public interface TranslationsWordDAO {
 
-    public void addGoogleTranslationOfWord(TranslationOfWord newTranslationOfWord);
+    public boolean add2SpecificDictionaryNewTranslationOfWord(Constants.SpecificDictionary specificDictionary, List<Integer> idWord, TranslationOfWord newTranslationOfWord);
 
-    public void addYandexTranslationOfWord(TranslationOfWord newTranslationOfWord);
+    public boolean assignedTranslatedWords2SpecificDictionary(Constants.SpecificDictionary specificDictionary, List<Integer> idWord, List<Integer> listIdTranslatedWords);
 
-    public void addCustomTranslationOfWord(TranslationOfWord newTranslationOfWord);
+    public boolean updateTranslatedOfWord(TranslationOfWord translationOfWord);
 
-    public void updateTranslationOfWord(TranslationOfWord translationOfWord);
+    public int removeTranslatedWordsById(List<Integer> listIdTranslatedWords);
 
-    public void removeTranslationById(int translationId);
+    public int removeTranslatedWordsByIdFromSpecificDictionary(Constants.SpecificDictionary specificDictionary, List<Integer> listIdTranslatedWords);
 
-    public List<TranslationOfWord> getGoogleTranslationsByWordId(int wordId);
+    public List<TranslationOfWord> getTranslatedWordsByWordIdFromSpecificDictionary(Constants.SpecificDictionary specificDictionary, final int wordId);
 
-    public List<TranslationOfWord> getYandexTranslationsByWordId(int wordId);
+    public List<TranslationOfWord> getTranslatedWordsFromSpecificDictionary(Constants.SpecificDictionary specificDictionary);
 
-    public List<TranslationOfWord> getCustomTranslationsByWordId(int wordId);
+    public List<TranslationOfWord> getAllTranslatedWords();
 
 }
