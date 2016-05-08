@@ -1,14 +1,9 @@
 package com.training.startandroid.trapp.model;
 
-import android.media.Image;
-import android.provider.MediaStore;
-
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by Администратор on 15.04.2016.
- */
+
 public class Word {
 
     private int id;

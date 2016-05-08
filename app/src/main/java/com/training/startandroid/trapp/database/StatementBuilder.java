@@ -3,9 +3,8 @@ package com.training.startandroid.trapp.database;
 import com.training.startandroid.trapp.util.Constants;
 
 /**
- * Created by Администратор on 28.04.2016.
- * <p/>
- * This class contain SQL PreparedStatement for inserting, updating and deleting information from all tables
+ *  This class contain SQL PreparedStatement for inserting, updating and deleting information from all tables
+ *
  */
 
 public class StatementBuilder {

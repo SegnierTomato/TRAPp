@@ -10,14 +10,11 @@ import android.util.Log;
 import com.training.startandroid.trapp.database.interfaces.CursorConverter;
 import com.training.startandroid.trapp.util.Constants;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * Created by Администратор on 13.04.2016.
- */
+
 public class DBHelper extends SQLiteOpenHelper {
 
     private final static String ERROR_TAG = "Exception: ";
@@ -27,22 +24,8 @@ public class DBHelper extends SQLiteOpenHelper {
         super(context, Constants.DB_SQLITE_NAME, null, Constants.DB_VERSION);
     }
 
-    public DBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+    public DBHelper(Context context, SQLiteDatabase.CursorFactory factory) {
         super(context, Constants.DB_SQLITE_NAME, factory, Constants.DB_VERSION);
-    }
-
-    public static File fileLoader(String path) {
-
-        File file = new File(path);
-
-//        getExternalStorageState()
-        if (file.canRead()) {
-
-
-            file.getAbsoluteFile();
-            return null;
-        }
-        return null;
     }
 
     public void open() {
@@ -138,9 +121,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
             for (Object[] oneRowParam : parameters) {
                 preparedStatement.clearBindings();
-                bindingParametersInPreparedStatement(preparedStatement, parameters);
+                bindingParametersInPreparedStatement(preparedStatement,oneRowParam);
                 id = preparedStatement.executeInsert();
-                listInsertId.add(Integer.valueOf((int) id));
+                listInsertId.add((int) id);
             }
             sqLiteDatabase.setTransactionSuccessful();
 

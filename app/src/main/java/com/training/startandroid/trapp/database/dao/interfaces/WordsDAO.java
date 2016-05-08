@@ -5,9 +5,6 @@ import com.training.startandroid.trapp.util.Constants;
 
 import java.util.List;
 
-/**
- * Created by Администратор on 15.04.2016.
- */
 public interface WordsDAO {
 
     public Constants.ResultStatusDatabase addWord(Word newWord);

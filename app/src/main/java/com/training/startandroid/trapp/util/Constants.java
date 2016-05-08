@@ -1,8 +1,6 @@
 package com.training.startandroid.trapp.util;
 
-/**
- * Created by Администратор on 20.04.2016.
- */
+
 public final class Constants {
 
     public static final String CREATE_SQLITE_TABLE_CATALOGS = "CREATE TABLE catalogs (" +
@@ -189,8 +187,6 @@ public final class Constants {
         UPDATE_WORD_SOUND,
 
         UPDATE_TRANSLETED_WORD
-
-
     }
 
     public enum ResultStatusDatabase{

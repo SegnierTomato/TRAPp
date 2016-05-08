@@ -5,9 +5,6 @@ import com.training.startandroid.trapp.util.Constants;
 
 import java.util.List;
 
-/**
- * Created by Администратор on 16.04.2016.
- */
 public interface TranslationsWordDAO {
 
     public boolean add2SpecificDictionaryNewTranslationOfWord(Constants.SpecificDictionary specificDictionary, List<Integer> idWord, TranslationOfWord newTranslationOfWord);

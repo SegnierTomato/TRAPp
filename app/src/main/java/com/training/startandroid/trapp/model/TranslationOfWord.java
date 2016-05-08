@@ -1,12 +1,8 @@
 package com.training.startandroid.trapp.model;
 
-import com.training.startandroid.trapp.database.dao.interfaces.TranslationsWordDAO;
-
 import java.util.Date;
 
-/**
- * Created by Администратор on 15.04.2016.
- */
+
 public class TranslationOfWord {
 
 

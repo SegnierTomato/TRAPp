@@ -17,9 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Created by Администратор on 16.04.2016.
- */
 
 public class WordsDAOImplSQLite implements WordsDAO {
 
@@ -38,26 +35,19 @@ public class WordsDAOImplSQLite implements WordsDAO {
             return Constants.ResultStatusDatabase.CAN_NOT_ADD_RECORD;
         }
 
-        boolean hasImage = false;
-        boolean hasSound = false;
+        List<Integer> listIdAddImage2Word = null;
+        List<Integer> listIdAddSound2Word = null;
 
         if (newWord.getImagePath() != null) {
 
             parameters[0] = new Object[]{newWord.getId(), newWord.getImagePath()};
-            List<Integer> listIdAddImage2Word = dbHelper.executeInsertQuery(Constants.ActionStatement.INSERT_NEW_WORD_IMAGE, parameters);
-            hasImage = true;
+            listIdAddImage2Word = dbHelper.executeInsertQuery(Constants.ActionStatement.INSERT_NEW_WORD_IMAGE, parameters);
         }
 
         if (newWord.getSoundPath() != null) {
 
             parameters[0] = new Object[]{newWord.getId(), newWord.getSoundPath()};
-            List<Integer> listIdAddSound2Word = dbHelper.executeInsertQuery(Constants.ActionStatement.INSERT_NEW_WORD_SOUND, parameters);
-            hasSound = true;
-        }
-
-
-        if (hasImage && hasSound) {
-
+            listIdAddSound2Word = dbHelper.executeInsertQuery(Constants.ActionStatement.INSERT_NEW_WORD_SOUND, parameters);
         }
 
         if (listIdAddImage2Word == null && listIdAddSound2Word == null) {
@@ -86,7 +76,7 @@ public class WordsDAOImplSQLite implements WordsDAO {
 
         if (word.getImagePath() == null) {
             parameters[0] = new Object[]{word.getId()};
-            return updateDeleteWord(Constants.ActionStatement.DELETE_WORD_IMAGE, parameters)
+            return updateDeleteWord(Constants.ActionStatement.DELETE_WORD_IMAGE, parameters);
         }
 
         parameters[0] = new Object[]{word.getImagePath(), word.getId()};
@@ -177,7 +167,7 @@ public class WordsDAOImplSQLite implements WordsDAO {
 
     @Override
     public int moveWords2Catalog(int idNewCatalog, List<Word> listWords, int idOldCatalog) {
-        
+
         int result = copyWords2Catalog(idNewCatalog, listWords);
 
         if (result == -1) {
@@ -224,7 +214,7 @@ public class WordsDAOImplSQLite implements WordsDAO {
 
                 while (iterator.hasNext()) {
                     word = iterator.next();
-                    if (word.getId() == wordId.intValue()) {
+                    if (wordId == word.getId()) {
                         word.setImagePath(paths.get(wordId));
                         break;
                     }
@@ -242,11 +232,8 @@ public class WordsDAOImplSQLite implements WordsDAO {
         DBHelper dbHelper = DatabaseConnection.getInstanceDBHelper();
         final int count = dbHelper.executeUpdateDeleteQuery(actionStatement, parameters);
 
-        if (count == -1) {
-            return false;
-        }
-
-        return true;
+        return count != -1 ? true : false;
+//        return count!=-1;
     }
 }
 
@@ -260,7 +247,7 @@ class WordsIdConverter implements CursorConverter {
         try {
 
             while (cursor.moveToNext()) {
-                wordsId.add(new Integer(cursor.getInt(0)));
+                wordsId.add(Integer.valueOf(cursor.getInt(0)));
             }
 
         } catch (Exception ex) {
@@ -302,7 +289,7 @@ class ImageSoundConverterByWordId implements CursorConverter {
             path = cursor.getString(0);
 
         } catch (Exception ex) {
-            path = new String();
+            path = "";
         } finally {
             cursor.close();
         }

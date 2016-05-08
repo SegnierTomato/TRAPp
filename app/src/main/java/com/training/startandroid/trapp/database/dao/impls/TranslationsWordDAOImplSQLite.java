@@ -16,9 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Created by Администратор on 16.04.2016.
- */
+
 public class TranslationsWordDAOImplSQLite implements TranslationsWordDAO {
 
     @Override
@@ -85,11 +83,8 @@ public class TranslationsWordDAOImplSQLite implements TranslationsWordDAO {
 
         final int result = dbHelper.executeUpdateDeleteQuery(Constants.ActionStatement.UPDATE_TRANSLETED_WORD, paramaters);
 
-        if (result == -1) {
-            return false;
-        }
-
-        return true;
+        return result != -1 ? true : false;
+//        return result != -1;
     }
 
     @Override
@@ -123,11 +118,11 @@ public class TranslationsWordDAOImplSQLite implements TranslationsWordDAO {
                 actionStatement = Constants.ActionStatement.DELETE_GOOGLE_TRANSLATE;
                 break;
             case YANDEX_DICTIONARY:
-                actionStatement = Constants.ActionStatement.DELETE_GOOGLE_TRANSLATE;
+                actionStatement = Constants.ActionStatement.DELETE_YANDEX_TRANSLATE;
                 break;
             case CUSTOM_DICTIONARY:
-                actionStatement = Constants.ActionStatement.DELETE_GOOGLE_TRANSLATE;
-
+                actionStatement = Constants.ActionStatement.DELETE_CUSTOM_TRANSLATE;
+                break;
             default:
                 return -1;
         }
