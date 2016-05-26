@@ -23,66 +23,66 @@ public final class Constants {
             "ON DELETE CASCADE ON UPDATE NO ACTION )";
 
 
-    public static final String CREATE_TABLE_CATALOGS_IMAGE = "CREATE TABLE catalogs_image( " +
+    public static final String CREATE_TABLE_CATALOGS_IMAGE = "CREATE TABLE catalogs_image ( " +
             "id_catalog INTEGER PRIMARY KEY NOT NULL, " +
             "image_path TEXT NOT NULL COLLATE NOCASE, " +
             "FOREIGN KEY (id_catalog) REFERENCES catalogs(id_catalog) " +
             "ON DELETE CASCADE ON UPDATE NO ACTION )";
 
-    public static final String CREATE_TABLE_WORDS_IMAGE = "CREATE TABLE words_image( " +
+    public static final String CREATE_TABLE_WORDS_IMAGE = "CREATE TABLE words_image ( " +
             "id_word INTEGER PRIMARY KEY NOT NULL, " +
             "image_path TEXT NOT NULL COLLATE NOCASE, " +
             "FOREIGN KEY (id_word) REFERENCES words(id_word) " +
             "ON DELETE CASCADE ON UPDATE NO ACTION )";
 
-    public static final String CREATE_TABLE_WORDS_SOUND = "CREATE TABLE words_sound( " +
+    public static final String CREATE_TABLE_WORDS_SOUND = "CREATE TABLE words_sound ( " +
             "id_word INTEGER PRIMARY KEY NOT NULL, " +
             "sound_path TEXT NOT NULL COLLATE NOCASE, " +
             "FOREIGN KEY (id_word) REFERENCES words(id_word) " +
             "ON DELETE CASCADE ON UPDATE NO ACTION )";
 
 
-    public static final String CREATE_SQLITE_TABLE_TRANSLATE_WORDS = "CREATE TABLE translate_words (\n" +
-            "id_translate INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
-            "translate_word TEXT NOT NULL COLLATE NOCASE,\n" +
-            "part_of_speech TEXT COLLATE NOCASE,\n" +
-            "created_at DATETIME DEFAULT CURRENT_TIMESTAMP\n" +
+    public static final String CREATE_SQLITE_TABLE_TRANSLATE_WORDS = "CREATE TABLE translate_words ( " +
+            "id_translate INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            "translate_word TEXT NOT NULL COLLATE NOCASE, " +
+            "part_of_speech TEXT COLLATE NOCASE, " +
+            "created_at DATETIME DEFAULT CURRENT_TIMESTAMP " +
             ")";
 
-    public static final String CREATE_SQLITE_TABLE_GOOGLE_TRANSLATE = "CREATE TABLE google_translate (\n" +
-            "id_word INTEGER NOT NULL,\n" +
-            "id_translate INTEGER NOT NULL,\n" +
-            "PRIMARY KEY (id_word, id_translate),\n" +
-            "FOREIGN KEY (id_word) REFERENCES words(id_word)\n" +
-            "ON DELETE CASCADE\n" +
-            "ON UPDATE CASCADE,\n" +
-            "FOREIGN KEY (id_translate) REFERENCES translate_words(id_translate)\n" +
-            "ON DELETE CASCADE\n" +
-            "ON UPDATE NO ACTION\n" +
+    public static final String CREATE_SQLITE_TABLE_GOOGLE_TRANSLATE = "CREATE TABLE google_translate ( " +
+            "id_word INTEGER NOT NULL, " +
+            "id_translate INTEGER NOT NULL, " +
+            "PRIMARY KEY (id_word, id_translate), " +
+            "FOREIGN KEY (id_word) REFERENCES words(id_word) " +
+            "ON DELETE CASCADE " +
+            "ON UPDATE CASCADE, " +
+            "FOREIGN KEY (id_translate) REFERENCES translate_words(id_translate) " +
+            "ON DELETE CASCADE " +
+            "ON UPDATE NO ACTION " +
             ")";
 
-    public static final String CREATE_SQLITE_TABLE_YANDEX_TRANSLATE = "CREATE TABLE yandex_translate (\n" +
-            "id_word INTEGER NOT NULL,\n" +
-            "id_translate INTEGER NOT NULL,\n" +
-            "PRIMARY KEY (id_word, id_translate),\n" +
-            "FOREIGN KEY (id_word) REFERENCES words(id_word)\n" +
-            "ON DELETE CASCADE\n" +
-            "ON UPDATE CASCADE,\n" +
-            "FOREIGN KEY (id_translate) REFERENCES translate_words(id_translate)\n" +
-            "ON DELETE CASCADE\n" +
-            "ON UPDATE NO ACTION\n" +
+    public static final String CREATE_SQLITE_TABLE_YANDEX_TRANSLATE = "CREATE TABLE yandex_translate ( " +
+            "id_word INTEGER NOT NULL, " +
+            "id_translate INTEGER NOT NULL, " +
+            "PRIMARY KEY (id_word, id_translate), " +
+            "FOREIGN KEY (id_word) REFERENCES words(id_word) " +
+            "ON DELETE CASCADE " +
+            "ON UPDATE CASCADE, " +
+            "FOREIGN KEY (id_translate) REFERENCES translate_words(id_translate) " +
+            "ON DELETE CASCADE " +
+            "ON UPDATE NO ACTION " +
             ")";
 
     public static final String CREATE_SQLITE_TABLE_CUSTOM_TRANSLATE = "CREATE TABLE custom_translate (\n" +
-            "id_word INTEGER NOT NULL,\n" +
-            "id_translate INTEGER NOT NULL,\n" +
-            "PRIMARY KEY (id_word, id_translate),\n" +
-            "FOREIGN KEY (id_word) REFERENCES words(id_word)\n" +
-            "ON DELETE CASCADE\n" +
-            "ON UPDATE CASCADE,\n" +
-            "FOREIGN KEY (id_translate) REFERENCES translate_words(id_translate)\n" +
-            "ON DELETE CASCADE\n" +
-            "ON UPDATE NO ACTION\n" +
+            "id_word INTEGER NOT NULL, " +
+            "id_translate INTEGER NOT NULL, " +
+            "PRIMARY KEY (id_word, id_translate), " +
+            "FOREIGN KEY (id_word) REFERENCES words(id_word) " +
+            "ON DELETE CASCADE " +
+            "ON UPDATE CASCADE, " +
+            "FOREIGN KEY (id_translate) REFERENCES translate_words(id_translate) " +
+            "ON DELETE CASCADE " +
+            "ON UPDATE NO ACTION " +
             ")";
 
 

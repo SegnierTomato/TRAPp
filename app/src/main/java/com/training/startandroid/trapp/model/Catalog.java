@@ -1,13 +1,10 @@
 package com.training.startandroid.trapp.model;
 
-import android.media.Image;
-
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by Администратор on 15.04.2016.
- */
+
 public class Catalog {
 
     private int id;
@@ -15,7 +12,7 @@ public class Catalog {
     private String name;
     private String imagePath;
     private Date date;
-    private List<Word> listWords;
+    private List<Word> listWords = new ArrayList<>();
 
     public Catalog(int id, String name, Date date) {
         this.id = id;

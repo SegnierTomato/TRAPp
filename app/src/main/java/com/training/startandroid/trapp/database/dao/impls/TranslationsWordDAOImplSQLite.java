@@ -1,6 +1,7 @@
 package com.training.startandroid.trapp.database.dao.impls;
 
 import android.database.Cursor;
+import android.util.Log;
 
 import com.training.startandroid.trapp.database.DBHelper;
 import com.training.startandroid.trapp.database.DatabaseConnection;
@@ -83,8 +84,8 @@ public class TranslationsWordDAOImplSQLite implements TranslationsWordDAO {
 
         final int result = dbHelper.executeUpdateDeleteQuery(Constants.ActionStatement.UPDATE_TRANSLETED_WORD, paramaters);
 
-        return result != -1 ? true : false;
-//        return result != -1;
+//        return result != -1 ? true : false;
+        return result != -1;
     }
 
     @Override
@@ -145,7 +146,7 @@ public class TranslationsWordDAOImplSQLite implements TranslationsWordDAO {
                 break;
             case CUSTOM_DICTIONARY:
                 selectQuery = Constants.SQLITE_SELECT_QUERY_FROM_TABLE_CUSTOM_TRANSLATE_BY_ID_WORD;
-
+                break;
             default:
                 return null;
         }
@@ -193,7 +194,7 @@ public class TranslationsWordDAOImplSQLite implements TranslationsWordDAO {
                 break;
             case CUSTOM_DICTIONARY:
                 selectQuery = Constants.SQLITE_SELECT_QUERY_FROM_TABLE_CUSTOM_TRANSLATE;
-
+                break;
             default:
                 return null;
         }
@@ -255,13 +256,17 @@ class SpecificDictionaryConverter implements CursorConverter {
 
         List<Integer> idWords = new ArrayList<>();
 
+        if (cursor == null) {
+            return idWords;
+        }
+
         try {
             while (cursor.moveToNext()) {
                 idWords.add(cursor.getInt(0));
             }
 
         } catch (Exception ex) {
-
+            Log.e("SpecificDictionaryConv", ex.toString());
         } finally {
             cursor.close();
         }
@@ -276,6 +281,11 @@ class TranslatedWordConverter implements CursorConverter {
     public Object convert(Cursor cursor) {
 
         TranslationOfWord translatedWord = null;
+
+        if (cursor == null) {
+            return getEmptyTrranslatedWord();
+        }
+
         try {
 
             while (cursor.moveToNext()) {
@@ -284,11 +294,16 @@ class TranslatedWordConverter implements CursorConverter {
 
 
         } catch (Exception ex) {
-            translatedWord = new TranslationOfWord(-1, null, null);
+            translatedWord = getEmptyTrranslatedWord();
+            Log.e("TranslatedWordConverter", ex.toString());
         } finally {
             cursor.close();
         }
         return translatedWord;
+    }
+
+    private TranslationOfWord getEmptyTrranslatedWord() {
+        return new TranslationOfWord(-1, null, null);
     }
 }
 
@@ -299,13 +314,17 @@ class AllTranslatedWordsConverter implements CursorConverter {
 
         List<TranslationOfWord> listWords = new ArrayList<>();
 
+        if (cursor == null) {
+            return listWords;
+        }
+
         try {
             while (cursor.moveToNext()) {
                 listWords.add(new TranslationOfWord(cursor.getInt(0), cursor.getString(1), cursor.getString(2), ConvertString2Date.convert(cursor.getString(3))));
             }
 
         } catch (Exception ex) {
-
+            Log.e("AllTranslatedWordsConv", ex.toString());
         } finally {
             cursor.close();
         }

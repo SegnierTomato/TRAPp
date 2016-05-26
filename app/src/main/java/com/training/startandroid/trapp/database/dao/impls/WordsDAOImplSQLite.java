@@ -1,6 +1,7 @@
 package com.training.startandroid.trapp.database.dao.impls;
 
 import android.database.Cursor;
+import android.util.Log;
 
 import com.training.startandroid.trapp.database.DBHelper;
 import com.training.startandroid.trapp.database.DatabaseConnection;
@@ -232,8 +233,8 @@ public class WordsDAOImplSQLite implements WordsDAO {
         DBHelper dbHelper = DatabaseConnection.getInstanceDBHelper();
         final int count = dbHelper.executeUpdateDeleteQuery(actionStatement, parameters);
 
-        return count != -1 ? true : false;
-//        return count!=-1;
+//        return count != -1 ? true : false;
+        return count != -1;
     }
 }
 
@@ -244,6 +245,10 @@ class WordsIdConverter implements CursorConverter {
 
         List<Integer> wordsId = new ArrayList<>();
 
+        if (cursor == null) {
+            return wordsId;
+        }
+
         try {
 
             while (cursor.moveToNext()) {
@@ -251,7 +256,7 @@ class WordsIdConverter implements CursorConverter {
             }
 
         } catch (Exception ex) {
-
+            Log.e("WordsIdConverter", ex.toString());
         } finally {
             cursor.close();
         }
@@ -266,15 +271,24 @@ class WordConverter implements CursorConverter {
 
         Word word;
 
+        if (cursor == null) {
+            return getEmptyWord();
+        }
+
         try {
             word = new Word(cursor.getInt(0), cursor.getString(1), ConvertString2Date.convert(cursor.getString(2)));
 
         } catch (Exception ex) {
-            word = new Word(-1, null, null);
+            word = getEmptyWord();
+            Log.e("WordConverter", ex.toString());
         } finally {
             cursor.close();
         }
         return word;
+    }
+
+    private Word getEmptyWord() {
+        return new Word(-1, null, null);
     }
 }
 
@@ -285,11 +299,16 @@ class ImageSoundConverterByWordId implements CursorConverter {
 
         String path;
 
+        if (cursor == null) {
+            return "";
+        }
+
         try {
             path = cursor.getString(0);
 
         } catch (Exception ex) {
             path = "";
+            Log.e("ImageSoundConverterById", ex.toString());
         } finally {
             cursor.close();
         }
@@ -305,13 +324,17 @@ class AllWordsConverter implements CursorConverter {
 
         List<Word> listAllWords = new ArrayList<>();
 
+        if (cursor == null) {
+            return listAllWords;
+        }
+
         try {
             while (cursor.moveToNext()) {
                 Word word = new Word(cursor.getInt(0), cursor.getString(1), ConvertString2Date.convert(cursor.getString(2)));
                 listAllWords.add(word);
             }
         } catch (Exception ex) {
-
+            Log.e("AllWordsConverter", ex.toString());
         } finally {
             cursor.close();
         }
@@ -331,7 +354,7 @@ class ImageSoundConverter implements CursorConverter {
                 listPaths.put(cursor.getInt(0), cursor.getString(1));
             }
         } catch (Exception ex) {
-
+            Log.e("ImageSoundConverter", ex.toString());
         } finally {
             cursor.close();
         }

@@ -1,6 +1,7 @@
 package com.training.startandroid.trapp.database.dao.impls;
 
 import android.database.Cursor;
+import android.util.Log;
 
 import com.training.startandroid.trapp.database.DBHelper;
 import com.training.startandroid.trapp.database.DatabaseConnection;
@@ -17,9 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Created by Администратор on 16.04.2016.
- */
 
 public class CatalogDAOImplSQLite implements CatalogsDAO {
 
@@ -35,7 +33,7 @@ public class CatalogDAOImplSQLite implements CatalogsDAO {
         if (listIdAdd2Catalog==null) {
             return Constants.ResultStatusDatabase.CAN_NOT_ADD_RECORD;
         }else{
-            newCatalog.setId(listIdAdd2Catalog.get(0).intValue());
+            newCatalog.setId(listIdAdd2Catalog.get(0));
         }
 
         if (newCatalog.getImagePath() != null) {
@@ -100,18 +98,6 @@ public class CatalogDAOImplSQLite implements CatalogsDAO {
         Catalog catalog;
 
         for (Integer id : idCatalogs) {
-
-//            for (Catalog catalog : listCatalogs) {
-//               if(catalog.getId()==id.intValue()){
-//                   catalog.setImagePath(imagesPath.get(id));
-//                   break;
-//               }
-//            }
-
-            /**
-             *  This code working faster then higher realization
-             */
-
             while (iterator.hasNext()) {
                 catalog = iterator.next();
                 if (catalog.getId() == id.intValue()) {
@@ -130,10 +116,8 @@ public class CatalogDAOImplSQLite implements CatalogsDAO {
         DBHelper dbHelper = DatabaseConnection.getInstanceDBHelper();
         final int result = dbHelper.executeUpdateDeleteQuery(actionStatement, parameters);
 
-        if (result == -1) {
-            return false;
-        }
-        return true;
+//        return result != -1?true:false;
+        return result!=-1;
     }
 
 }
@@ -144,6 +128,11 @@ class CatalogConverter implements CursorConverter {
     public Object convert(Cursor cursor) {
 
         List<Catalog> listCatalogs = new ArrayList<>();
+
+        if(cursor==null){
+            return listCatalogs;
+        }
+
         try {
 
             while (cursor.moveToNext()) {
@@ -151,7 +140,7 @@ class CatalogConverter implements CursorConverter {
             }
 
         } catch (Exception ex) {
-
+            Log.e("CatalogConverter", ex.toString());
         } finally {
             cursor.close();
         }
@@ -167,13 +156,17 @@ class CatalogImageConverter implements CursorConverter {
 
         Map<Integer, String> imagesPath = new HashMap<>();
 
+        if(cursor==null){
+            return imagesPath;
+        }
+
         try {
             while (cursor.moveToNext()) {
                 imagesPath.put(cursor.getInt(0), cursor.getString(1));
             }
 
         } catch (Exception ex) {
-
+            Log.e("CatalogImageConverter", ex.toString());
         } finally {
             cursor.close();
         }

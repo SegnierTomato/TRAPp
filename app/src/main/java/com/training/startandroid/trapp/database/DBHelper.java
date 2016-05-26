@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
 public class DBHelper extends SQLiteOpenHelper {
 
     private final static String ERROR_TAG = "Exception: ";
@@ -42,48 +41,62 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        db.beginTransaction();
+        Log.d("DBHelper", "Method onCreate in DBHelper in");
+        try {
+            db.beginTransaction();
 
-        db.execSQL(Constants.CREATE_SQLITE_TABLE_CATALOGS);
-        db.execSQL(Constants.CREATE_SQLITE_TABLE_WORDS);
-        db.execSQL(Constants.CREATE_SQLITE_TABLE_CATALOGS_AND_WORDS_RELATIONS);
+            db.execSQL(Constants.CREATE_SQLITE_TABLE_CATALOGS);
+            db.execSQL(Constants.CREATE_SQLITE_TABLE_WORDS);
+            db.execSQL(Constants.CREATE_SQLITE_TABLE_CATALOGS_AND_WORDS_RELATIONS);
 
-        db.execSQL(Constants.CREATE_TABLE_CATALOGS_IMAGE);
-        db.execSQL(Constants.CREATE_TABLE_WORDS_IMAGE);
-        db.execSQL(Constants.CREATE_TABLE_WORDS_SOUND);
+            db.execSQL(Constants.CREATE_TABLE_CATALOGS_IMAGE);
+            db.execSQL(Constants.CREATE_TABLE_WORDS_IMAGE);
+            db.execSQL(Constants.CREATE_TABLE_WORDS_SOUND);
 
-        db.execSQL(Constants.CREATE_SQLITE_TABLE_TRANSLATE_WORDS);
+            db.execSQL(Constants.CREATE_SQLITE_TABLE_TRANSLATE_WORDS);
 
-        db.execSQL(Constants.CREATE_SQLITE_TABLE_GOOGLE_TRANSLATE);
-        db.execSQL(Constants.CREATE_SQLITE_TABLE_YANDEX_TRANSLATE);
-        db.execSQL(Constants.CREATE_SQLITE_TABLE_CUSTOM_TRANSLATE);
+            db.execSQL(Constants.CREATE_SQLITE_TABLE_GOOGLE_TRANSLATE);
+            db.execSQL(Constants.CREATE_SQLITE_TABLE_YANDEX_TRANSLATE);
+            db.execSQL(Constants.CREATE_SQLITE_TABLE_CUSTOM_TRANSLATE);
 
-        db.execSQL(Constants.CREATE_SQLITE_TRIGGER_DELETE_FREE_WORDS);
+            db.execSQL(Constants.CREATE_SQLITE_TRIGGER_DELETE_FREE_WORDS);
 
-        db.execSQL(Constants.CREATE_SQLITE_TRIGGER_DELETE_FREE_GOOGLE_TRANSLATION);
-        db.execSQL(Constants.CREATE_SQLITE_TRIGGER_DELETE_FREE_YANDEX_TRANSLATION);
-        db.execSQL(Constants.CREATE_SQLITE_TRIGGER_DELETE_FREE_CUSTOM_TRANSLATION);
+            db.execSQL(Constants.CREATE_SQLITE_TRIGGER_DELETE_FREE_GOOGLE_TRANSLATION);
+            db.execSQL(Constants.CREATE_SQLITE_TRIGGER_DELETE_FREE_YANDEX_TRANSLATION);
+            db.execSQL(Constants.CREATE_SQLITE_TRIGGER_DELETE_FREE_CUSTOM_TRANSLATION);
 
-        db.endTransaction();
+            db.setTransactionSuccessful();
+        } catch (Exception ex) {
+            Log.d(ERROR_TAG, ex.toString());
+        } finally {
+            db.endTransaction();
+        }
 
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        onCreate(db);
+    }
+
+    public synchronized Object executeSelectQuery(final String query, String[] parameter, CursorConverter converter) {
+
+        Cursor cursor = null;
+        try {
+            /**
+             *  Usually I must using method query without rawQuery
+             */
+            cursor = sqLiteDatabase.rawQuery(query, parameter);
+        } catch (Exception ex) {
+            Log.d(ERROR_TAG, ex.toString());
+        } finally {
+            return converter.convert(cursor);
+        }
+
 
     }
 
-    public Object executeSelectQuery(final String query, String[] parameter, CursorConverter converter) {
-
-        /**
-         *  Usually I must using method query without rawQuery
-         */
-        Cursor cursor = sqLiteDatabase.rawQuery(query, parameter);
-        return converter.convert(cursor);
-
-    }
-
-    public int executeUpdateDeleteQuery(Constants.ActionStatement actionStatement, Object[][] parameters) {
+    public synchronized int executeUpdateDeleteQuery(Constants.ActionStatement actionStatement, Object[][] parameters) {
 
         try {
             sqLiteDatabase.beginTransaction();
@@ -110,7 +123,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    public List<Integer> executeInsertQuery(Constants.ActionStatement actionStatement, Object[][] parameters) {
+    public synchronized List<Integer> executeInsertQuery(Constants.ActionStatement actionStatement, Object[][] parameters) {
 
         try {
             sqLiteDatabase.beginTransaction();
@@ -121,7 +134,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
             for (Object[] oneRowParam : parameters) {
                 preparedStatement.clearBindings();
-                bindingParametersInPreparedStatement(preparedStatement,oneRowParam);
+                bindingParametersInPreparedStatement(preparedStatement, oneRowParam);
                 id = preparedStatement.executeInsert();
                 listInsertId.add((int) id);
             }
