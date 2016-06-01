@@ -9,7 +9,7 @@ import com.training.startandroid.trapp.database.dao.interfaces.TranslationsWordD
 import com.training.startandroid.trapp.database.interfaces.CursorConverter;
 import com.training.startandroid.trapp.model.TranslationOfWord;
 import com.training.startandroid.trapp.util.Constants;
-import com.training.startandroid.trapp.util.ConvertString2Date;
+import com.training.startandroid.trapp.util.DateConverter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -289,7 +289,7 @@ class TranslatedWordConverter implements CursorConverter {
         try {
 
             while (cursor.moveToNext()) {
-                translatedWord = new TranslationOfWord(cursor.getInt(0), cursor.getString(1), cursor.getString(2), ConvertString2Date.convert(cursor.getString(3)));
+                translatedWord = new TranslationOfWord(cursor.getInt(0), cursor.getString(1), cursor.getString(2), DateConverter.convertString2Date(cursor.getString(3)));
             }
 
 
@@ -320,7 +320,7 @@ class AllTranslatedWordsConverter implements CursorConverter {
 
         try {
             while (cursor.moveToNext()) {
-                listWords.add(new TranslationOfWord(cursor.getInt(0), cursor.getString(1), cursor.getString(2), ConvertString2Date.convert(cursor.getString(3))));
+                listWords.add(new TranslationOfWord(cursor.getInt(0), cursor.getString(1), cursor.getString(2), DateConverter.convertString2Date(cursor.getString(3))));
             }
 
         } catch (Exception ex) {

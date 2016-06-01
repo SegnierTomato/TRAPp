@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <Button
+        android:id="@+id/catalog_open_button"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@android:color/transparent"
+        android:gravity="left|center_vertical"
+        android:text="Show"
+        android:textAlignment="center"
+        android:textColor="@color/colorAccent" />
+
+
+    <Button
+        android:id="@+id/catalog_expandable_button"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@android:color/transparent"
+        android:gravity="right|center_vertical"
+        android:text="Expand Card"
+        android:textAlignment="center"
+        android:textColor="@color/colorAccent" />
+
+
+</RelativeLayout>

@@ -9,7 +9,7 @@ import com.training.startandroid.trapp.database.dao.interfaces.WordsDAO;
 import com.training.startandroid.trapp.database.interfaces.CursorConverter;
 import com.training.startandroid.trapp.model.Word;
 import com.training.startandroid.trapp.util.Constants;
-import com.training.startandroid.trapp.util.ConvertString2Date;
+import com.training.startandroid.trapp.util.DateConverter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -276,7 +276,7 @@ class WordConverter implements CursorConverter {
         }
 
         try {
-            word = new Word(cursor.getInt(0), cursor.getString(1), ConvertString2Date.convert(cursor.getString(2)));
+            word = new Word(cursor.getInt(0), cursor.getString(1), DateConverter.convertString2Date(cursor.getString(2)));
 
         } catch (Exception ex) {
             word = getEmptyWord();
@@ -330,7 +330,7 @@ class AllWordsConverter implements CursorConverter {
 
         try {
             while (cursor.moveToNext()) {
-                Word word = new Word(cursor.getInt(0), cursor.getString(1), ConvertString2Date.convert(cursor.getString(2)));
+                Word word = new Word(cursor.getInt(0), cursor.getString(1), DateConverter.convertString2Date(cursor.getString(2)));
                 listAllWords.add(word);
             }
         } catch (Exception ex) {

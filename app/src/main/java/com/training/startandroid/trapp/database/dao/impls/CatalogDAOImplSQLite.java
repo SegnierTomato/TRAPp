@@ -9,7 +9,7 @@ import com.training.startandroid.trapp.database.dao.interfaces.CatalogsDAO;
 import com.training.startandroid.trapp.database.interfaces.CursorConverter;
 import com.training.startandroid.trapp.model.Catalog;
 import com.training.startandroid.trapp.util.Constants;
-import com.training.startandroid.trapp.util.ConvertString2Date;
+import com.training.startandroid.trapp.util.DateConverter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -136,7 +136,7 @@ class CatalogConverter implements CursorConverter {
         try {
 
             while (cursor.moveToNext()) {
-                listCatalogs.add(new Catalog(cursor.getInt(0), cursor.getString(1), ConvertString2Date.convert(cursor.getString(2))));
+                listCatalogs.add(new Catalog(cursor.getInt(0), cursor.getString(1), DateConverter.convertString2Date(cursor.getString(2))));
             }
 
         } catch (Exception ex) {
