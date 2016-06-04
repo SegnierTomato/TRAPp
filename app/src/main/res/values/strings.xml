@@ -4,5 +4,13 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
+    <!-- ActionBar menu -->
+    <string name="action_remove">Remove</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_search">Search</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_select_all">Select All</string>
+    <string name="action_unselected_all">Unselected All</string>
+
+    <string name="action_setting">Setting</string>
 </resources>

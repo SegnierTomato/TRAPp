@@ -1,9 +1,10 @@
 package com.training.startandroid.trapp.ui;
 
 
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -20,7 +21,10 @@ import com.training.startandroid.trapp.util.DateConverter;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TreeSet;
 
 public class SelectableRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         implements HolderClickObserver, SelectionObserver {
@@ -29,7 +33,7 @@ public class SelectableRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
     private SelectionHelper mSelectionHelper;
     private MainActivity mActivity;
 
-    public SelectableRecyclerViewAdapter( MainActivity activity, List<Catalog> listCatalogs) {
+    public SelectableRecyclerViewAdapter(MainActivity activity, List<Catalog> listCatalogs) {
 
         mActivity = activity;
 
@@ -69,6 +73,35 @@ public class SelectableRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
         mSelectionHelper.bindHolder(catalogHolder, position);
     }
 
+    public void removeSelectedItems() {
+
+        HashSet<Integer> selectedPositions = mSelectionHelper.getSelectedItemsPositions();
+
+        TreeSet<Integer> sortedPositions = new TreeSet<>(selectedPositions);
+        Iterator iterator = sortedPositions.descendingIterator();
+
+        while (iterator.hasNext()) {
+            int removedPosition = (Integer) iterator.next();
+            mListCatalogs.remove(removedPosition);
+            selectedPositions.remove(removedPosition);
+            notifyItemRemoved(removedPosition);
+        }
+
+        changeActionModeMenu();
+    }
+
+    public void clearSelectionsItems() {
+        mSelectionHelper.clearSelection();
+        notifyDataSetChanged();
+    }
+
+
+    public void selectAllItems() {
+        mSelectionHelper.setAllItemsSelected(mListCatalogs.size());
+        notifyDataSetChanged();
+
+        changeActionModeMenu();
+    }
 
     @Override
     public void onHolderClick(RecyclerView.ViewHolder viewHolder) {
@@ -82,12 +115,27 @@ public class SelectableRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
 
     @Override
     public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, boolean isSelected) {
-        ((Checkable)viewHolder.itemView).setChecked(isSelected);
+        ((Checkable) viewHolder.itemView).setChecked(isSelected);
+        changeActionModeMenu();
+    }
+
+    private void changeActionModeMenu() {
+        ActionMode actionMode = mActivity.getActionMode();
+        int countSelectedItems = mSelectionHelper.getSelectedItemsCount();
+        MenuItem item = actionMode.getMenu().getItem(0);
+
+        if (countSelectedItems > 1) {
+            item.setVisible(false);
+        } else if (!actionMode.getMenu().getItem(0).isVisible()) {
+            item.setVisible(true);
+        }
+
+        actionMode.setTitle(String.valueOf(countSelectedItems));
     }
 
     @Override
     public void onSelectableChanged(boolean isSelectable) {
-        if(isSelectable){
+        if (isSelectable) {
             mActivity.startActionMode();
         }
     }
@@ -115,13 +163,13 @@ public class SelectableRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
         }
 
         public void bindInfo(Catalog catalog) {
-            Log.d("TRAPp", "Method bindInfo in CatalogHolder");
 //            catalogImage.setImageBitmap(BitmapFactory.decodeResource(catalogName.getContext().getResources(), R.drawable.empty_photo));
             catalogName.setText(catalog.getName());
             catalogCountWords.setText("Words count: " + "10");
 
             Date date = catalog.getDate();
             catalogCreatedDate.setText(DateConverter.convertDate2String(date));
+
         }
     }
 }

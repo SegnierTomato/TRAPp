@@ -6,6 +6,7 @@ import android.view.View;
 
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
+
 import android.database.Observable;
 
 public final class SelectionHelper {
@@ -44,9 +45,19 @@ public final class SelectionHelper {
         setItemSelected(holder, !isItemSelected(holder));
     }
 
+    public void setAllItemsSelected(int countElements) {
+
+        for (int i = 0; i < countElements; i++) {
+            if (!mSelectedItems.contains(i)) {
+                mSelectedItems.add(i);
+            }
+        }
+    }
+
     public boolean setItemSelected(RecyclerView.ViewHolder holder, boolean isSelected) {
 
         int position = holder.getAdapterPosition();
+
         if (position != RecyclerView.NO_POSITION) {
 
             boolean isAlreadySelected = isItemSelected(position);
@@ -65,6 +76,7 @@ public final class SelectionHelper {
             return false;
         }
     }
+
     public boolean isItemSelected(RecyclerView.ViewHolder holder) {
         return mSelectedItems.contains(holder.getAdapterPosition());
     }
@@ -75,6 +87,10 @@ public final class SelectionHelper {
 
     public int getSelectedItemsCount() {
         return mSelectedItems.size();
+    }
+
+    public HashSet<Integer> getSelectedItemsPositions() {
+        return mSelectedItems;
     }
 
     public boolean isSelectable() {
@@ -206,9 +222,9 @@ public final class SelectionHelper {
         }
     }
 
-    private class ViewHolderClickWrapper extends ViewHolderWrapper{
+    private class ViewHolderClickWrapper extends ViewHolderWrapper {
 
-        private ViewHolderClickWrapper(RecyclerView.ViewHolder holder){
+        private ViewHolderClickWrapper(RecyclerView.ViewHolder holder) {
             super(holder);
             View itemView = holder.itemView;
             itemView.setOnClickListener(this);
@@ -216,9 +232,9 @@ public final class SelectionHelper {
         }
 
         @Override
-        public final void onClick(View v){
+        public final void onClick(View v) {
             RecyclerView.ViewHolder holder = mWrappedHolderRef.get();
-            if(holder!=null){
+            if (holder != null) {
                 mHolderClickObservable.notifyOnHolderClick(mWrappedHolderRef.get());
             }
         }

@@ -2,11 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:id="@+id/action_setting"
+        android:title="@string/action_setting"
         app:showAsAction="never" />
+
     <item
-        android:id="@+id/remove"
-        android:title="Remove"/>
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_action_search"
+        android:title="@string/action_search"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_cancel"
+        android:icon="@drawable/ic_action_cancel"
+        android:title="@string/action_cancel"
+        app:showAsAction="never" />
+
+
+
 </menu>

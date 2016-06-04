@@ -1,27 +1,31 @@
 package com.training.startandroid.trapp.ui;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.ActionBar;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.view.ActionMode;
+
+import android.support.v7.view.ActionMode;
+//import android.view.ActionMode;
+
+import android.support.v7.widget.Toolbar;
+//import android.widget.Toolbar;
+
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.training.startandroid.trapp.R;
 import com.training.startandroid.trapp.database.DatabaseConnection;
 import com.training.startandroid.trapp.database.dao.DAOFactory;
@@ -31,6 +35,7 @@ import com.training.startandroid.trapp.ui.selection.SelectionObserver;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -38,6 +43,7 @@ public class MainActivity extends AppCompatActivity
 
     private final ActionModeCallback mActionModeCallback = new ActionModeCallback();
     private SelectableRecyclerViewAdapter mAdapter;
+    private ActionMode mActionMode;
 
     public static boolean isTablet(Context context) {
 
@@ -66,8 +72,10 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        ActionBar actionBar = getSupportActionBar();
+//        actionBar.setDisplayHomeAsUpEnabled(true);
 
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 //        fab.setAnimation();
 
         assert fab != null;
@@ -76,7 +84,6 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
             }
         });
-
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -88,9 +95,7 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
 //        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
 
         DatabaseConnection.initializeConnection(getApplicationContext());
         DatabaseConnection.openConnection();
@@ -98,19 +103,27 @@ public class MainActivity extends AppCompatActivity
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.catalog_recycler_view);
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(getDisplayColumns(this), StaggeredGridLayoutManager.VERTICAL));
 
+        RecyclerView.ItemAnimator itemAnimatior = new DefaultItemAnimator();
+        recyclerView.setItemAnimator(itemAnimatior);
 
-//        List<Catalog> listCatalogs =  DAOFactory.getCatalogsDAO().getAllCatalogs();
 
-        List<Catalog> listCatalogs = new ArrayList<>();
-        Catalog testCatalog1 = new Catalog(-1, "Test Catalog 1", new Date());
-        listCatalogs.add(testCatalog1);
-        Catalog testCatalog2 = new Catalog(-2, "Test Catalog 2", new Date());
-        listCatalogs.add(testCatalog2);
+//        List<Catalog> listCatalogs = DAOFactory.getCatalogsDAO().getAllCatalogs();
+
+        List<Catalog> listCatalogs = initializeListCatalogs(50);
 
         mAdapter = new SelectableRecyclerViewAdapter(this, listCatalogs);
         recyclerView.setAdapter(mAdapter);
 
+    }
 
+    private List<Catalog> initializeListCatalogs(int count) {
+        List<Catalog> listCatalogs = new ArrayList<>();
+
+        for (int i = 0; i < count; i++) {
+            Catalog newCatalog = new Catalog(i + 1, "Test Catalog " + (i+1), new Date());
+            listCatalogs.add(newCatalog);
+        }
+        return listCatalogs;
     }
 
     @Override
@@ -132,17 +145,19 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_remove:
+                return true;
+            case R.id.action_edit:
+                return true;
+            case R.id.action_setting:
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
 
-        return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -182,7 +197,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void startActionMode() {
-        startActionMode(mActionModeCallback);
+        mActionMode = startSupportActionMode(mActionModeCallback);
+    }
+
+    public ActionMode getActionMode(){
+        return mActionMode;
     }
 
     private class ActionModeCallback implements ActionMode.Callback, SelectionObserver {
@@ -205,19 +224,46 @@ public class MainActivity extends AppCompatActivity
         @Override
         public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
             mActionMode = actionMode;
+
             mActionMode.getMenuInflater().inflate(R.menu.catalog_selection, menu);
             mAdapter.getSelectionHelper().registerSelectionObserver(this);
             return true;
+
         }
 
         @Override
         public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+
+            SelectionHelper selectionHelper = mAdapter.getSelectionHelper();
+
             switch (menuItem.getItemId()) {
-                case R.id.menu_catalog_selection:
+                case R.id.action_remove:
+
+                    HashSet<Integer> selectedPositions = selectionHelper.getSelectedItemsPositions();
+                    for (Integer position : selectedPositions) {
+//                        DAOFactory.getCatalogsDAO().removeCatalogById(position);
+                    }
+                    mAdapter.removeSelectedItems();
+
                     Toast.makeText(MainActivity.this,
-                            "simple toast menu", Toast.LENGTH_SHORT).show();
+                            "Remove selected catalogs", Toast.LENGTH_SHORT).show();
+
+                    break;
+
+                case R.id.action_edit:
+
+                    break;
+
+                case R.id.action_select_all:
+
+                    mAdapter.selectAllItems();
+                    break;
+
+                case R.id.action_unselected_all:
+                    mAdapter.clearSelectionsItems();
                     break;
             }
+
             return true;
         }
 

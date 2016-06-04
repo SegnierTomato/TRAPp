@@ -1,7 +1,6 @@
 package com.training.startandroid.trapp.ui.widgets;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.widget.Checkable;
