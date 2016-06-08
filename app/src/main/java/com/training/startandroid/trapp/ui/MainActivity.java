@@ -1,13 +1,11 @@
 package com.training.startandroid.trapp.ui;
 
-import android.content.Context;
-import android.content.res.Configuration;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.app.Fragment;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 
 import android.support.v7.view.ActionMode;
 //import android.view.ActionMode;
@@ -15,6 +13,7 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 //import android.widget.Toolbar;
 
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -24,45 +23,16 @@ import android.support.v7.app.AppCompatActivity;
 
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
+import android.widget.RelativeLayout;
 
 import com.training.startandroid.trapp.R;
-import com.training.startandroid.trapp.database.DatabaseConnection;
-import com.training.startandroid.trapp.database.dao.DAOFactory;
-import com.training.startandroid.trapp.model.Catalog;
-import com.training.startandroid.trapp.ui.selection.SelectionHelper;
-import com.training.startandroid.trapp.ui.selection.SelectionObserver;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private final ActionModeCallback mActionModeCallback = new ActionModeCallback();
-    private SelectableRecyclerViewAdapter mAdapter;
-    private ActionMode mActionMode;
-
-    public static boolean isTablet(Context context) {
-
-        boolean xlarge = ((context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == 4);
-        boolean large = ((context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) ==
-                Configuration.SCREENLAYOUT_SIZE_LARGE);
-
-        return (xlarge || large);
-    }
-
-    public static int getDisplayColumns(Context context) {
-
-        int columnCount = 1;
-        if (isTablet(context)) {
-            columnCount = 2;
-        }
-
-        return columnCount;
-    }
+    private final String LOG_TAG = "class MainActivity";
+    private RelativeLayout mFragmentParentLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,8 +50,32 @@ public class MainActivity extends AppCompatActivity
 
         assert fab != null;
         fab.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View view) {
+
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                int countFragment = fragmentManager.getBackStackEntryCount();
+
+                final String tag = fragmentManager.getBackStackEntryAt(countFragment - 1).getName();
+                Fragment currentFragment = fragmentManager.findFragmentByTag(tag);
+
+                if (currentFragment != null) {
+                    fragmentTransaction.hide(currentFragment);
+                }
+
+                Fragment addCatalogFragment = new AddCatalogFragment();
+
+                final String currentOperationTag = AddCatalogFragment.class.getName();
+                fragmentTransaction.add(R.id.fragment_parent_layout, addCatalogFragment, currentOperationTag);
+
+                fragmentTransaction.addToBackStack(currentOperationTag);
+                fragmentTransaction.commit();
+
+                Log.d("Fragment fab stack coun", fragmentManager.getBackStackEntryCount() + "");
+
             }
         });
 
@@ -97,33 +91,54 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 //        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        DatabaseConnection.initializeConnection(getApplicationContext());
-        DatabaseConnection.openConnection();
-
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.catalog_recycler_view);
-        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(getDisplayColumns(this), StaggeredGridLayoutManager.VERTICAL));
-
-        RecyclerView.ItemAnimator itemAnimatior = new DefaultItemAnimator();
-        recyclerView.setItemAnimator(itemAnimatior);
+        mFragmentParentLayout = (RelativeLayout) findViewById(R.id.fragment_parent_layout);
 
 
-//        List<Catalog> listCatalogs = DAOFactory.getCatalogsDAO().getAllCatalogs();
+        FragmentManager fragmentManager = getFragmentManager();
 
-        List<Catalog> listCatalogs = initializeListCatalogs(50);
+//        FragmentsOnBackStackListener backStackListener = new FragmentsOnBackStackListener();
 
-        mAdapter = new SelectableRecyclerViewAdapter(this, listCatalogs);
-        recyclerView.setAdapter(mAdapter);
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+        CatalogsViewFragment catalogsViewFragment = new CatalogsViewFragment();
+        final String tag = CatalogsViewFragment.class.getName();
+//        transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right);
+        transaction.add(R.id.fragment_parent_layout, catalogsViewFragment,tag);
+
+        transaction.addToBackStack(tag);
+        transaction.commit();
 
     }
 
-    private List<Catalog> initializeListCatalogs(int count) {
-        List<Catalog> listCatalogs = new ArrayList<>();
+    private void getBackPreviousFragment(Fragment currentFragment, Fragment previousFragment) {
 
-        for (int i = 0; i < count; i++) {
-            Catalog newCatalog = new Catalog(i + 1, "Test Catalog " + (i+1), new Date());
-            listCatalogs.add(newCatalog);
+        try {
+            FragmentManager fragmentManager = getFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+            if (currentFragment != null) {
+//            fragmentTransaction.hide(currentFragment);
+                fragmentTransaction.remove(currentFragment);
+            }
+
+            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
+
+            if (previousFragment != null) {
+                fragmentTransaction.show(previousFragment);
+            }
+
+            int count = fragmentManager.getBackStackEntryCount();
+            fragmentManager.popBackStackImmediate();
+            count = fragmentManager.getBackStackEntryCount();
+
+//            fragmentTransaction.addToBackStack(null);
+            fragmentTransaction.commit();
+
+
+        } catch (Exception ex) {
+            Log.e(LOG_TAG, ex.toString());
         }
-        return listCatalogs;
+
     }
 
     @Override
@@ -131,9 +146,26 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+            return;
+        }
+
+        FragmentManager fragmentManager = getFragmentManager();
+        int countFragments = fragmentManager.getBackStackEntryCount();
+
+        if (countFragments != 1) {
+
+            final String tagCurrent = fragmentManager.getBackStackEntryAt(countFragments - 1).getName();
+            final String tagPrevious = fragmentManager.getBackStackEntryAt(countFragments - 2).getName();
+            Fragment currentFragment = fragmentManager.findFragmentByTag(tagCurrent);
+            Fragment previousFragment = fragmentManager.findFragmentByTag(tagPrevious);
+
+            getBackPreviousFragment(currentFragment, previousFragment);
+
         } else {
+
             super.onBackPressed();
         }
+
     }
 
     @Override
@@ -186,101 +218,29 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onResume() {
-        DatabaseConnection.openConnection();
         super.onResume();
     }
 
     @Override
     protected void onPause() {
-        DatabaseConnection.closeConnection();
         super.onPause();
     }
 
-    public void startActionMode() {
-        mActionMode = startSupportActionMode(mActionModeCallback);
-    }
-
-    public ActionMode getActionMode(){
-        return mActionMode;
-    }
-
-    private class ActionModeCallback implements ActionMode.Callback, SelectionObserver {
-
-        private ActionMode mActionMode;
+    class FragmentsOnBackStackListener implements FragmentManager.OnBackStackChangedListener {
 
         @Override
-        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-            return false;
-        }
+        public void onBackStackChanged() {
 
-        @Override
-        public void onDestroyActionMode(ActionMode actionMode) {
-            SelectionHelper selectionHelper = mAdapter.getSelectionHelper();
-            selectionHelper.unregisterSelectionObserver(this);
-            mActionMode = null;
-            selectionHelper.setSelectable(false);
-        }
+            FragmentManager fragmentManager = getFragmentManager();
 
-        @Override
-        public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
-            mActionMode = actionMode;
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-            mActionMode.getMenuInflater().inflate(R.menu.catalog_selection, menu);
-            mAdapter.getSelectionHelper().registerSelectionObserver(this);
-            return true;
-
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-
-            SelectionHelper selectionHelper = mAdapter.getSelectionHelper();
-
-            switch (menuItem.getItemId()) {
-                case R.id.action_remove:
-
-                    HashSet<Integer> selectedPositions = selectionHelper.getSelectedItemsPositions();
-                    for (Integer position : selectedPositions) {
-//                        DAOFactory.getCatalogsDAO().removeCatalogById(position);
-                    }
-                    mAdapter.removeSelectedItems();
-
-                    Toast.makeText(MainActivity.this,
-                            "Remove selected catalogs", Toast.LENGTH_SHORT).show();
-
-                    break;
-
-                case R.id.action_edit:
-
-                    break;
-
-                case R.id.action_select_all:
-
-                    mAdapter.selectAllItems();
-                    break;
-
-                case R.id.action_unselected_all:
-                    mAdapter.clearSelectionsItems();
-                    break;
+            for (int i = 0; i < fragmentManager.getBackStackEntryCount(); i++) {
+                int id = fragmentManager.getBackStackEntryAt(i).getId();
+                Fragment fragment = fragmentManager.findFragmentById(id);
             }
 
-            return true;
-        }
-
-        @Override
-        public void onSelectedChanged(RecyclerView.ViewHolder holder, boolean isSelected) {
-            if (mActionMode != null) {
-                int checkedCatalogsCount = mAdapter.getSelectionHelper().getSelectedItemsCount();
-                mActionMode.setTitle(String.valueOf(checkedCatalogsCount));
-            }
-        }
-
-        @Override
-        public void onSelectableChanged(boolean isSelectable) {
-
-            if (!isSelectable) {
-                mActionMode.finish();
-            }
+            fragmentTransaction.commit();
         }
     }
 }

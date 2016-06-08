@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.Checkable;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.app.Fragment;
 
 import com.training.startandroid.trapp.R;
 import com.training.startandroid.trapp.model.Catalog;
@@ -31,11 +32,11 @@ public class SelectableRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
 
     private List<Catalog> mListCatalogs;
     private SelectionHelper mSelectionHelper;
-    private MainActivity mActivity;
+    private CatalogsViewFragment mFragment;
 
-    public SelectableRecyclerViewAdapter(MainActivity activity, List<Catalog> listCatalogs) {
+    public SelectableRecyclerViewAdapter(CatalogsViewFragment fragment, List<Catalog> listCatalogs) {
 
-        mActivity = activity;
+        mFragment  = fragment;
 
         if (listCatalogs != null) {
             this.mListCatalogs = listCatalogs;
@@ -120,13 +121,13 @@ public class SelectableRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
     }
 
     private void changeActionModeMenu() {
-        ActionMode actionMode = mActivity.getActionMode();
+        ActionMode actionMode = mFragment.getActionMode();
         int countSelectedItems = mSelectionHelper.getSelectedItemsCount();
         MenuItem item = actionMode.getMenu().getItem(0);
 
         if (countSelectedItems > 1) {
             item.setVisible(false);
-        } else if (!actionMode.getMenu().getItem(0).isVisible()) {
+        } else if (!item.isVisible()) {
             item.setVisible(true);
         }
 
@@ -136,7 +137,7 @@ public class SelectableRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
     @Override
     public void onSelectableChanged(boolean isSelectable) {
         if (isSelectable) {
-            mActivity.startActionMode();
+            mFragment.startActionMode();
         }
     }
 
