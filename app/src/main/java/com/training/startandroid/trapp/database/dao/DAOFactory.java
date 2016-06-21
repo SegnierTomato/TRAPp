@@ -8,9 +8,7 @@ import com.training.startandroid.trapp.database.dao.interfaces.CatalogsDAO;
 import com.training.startandroid.trapp.database.dao.interfaces.TranslationsWordDAO;
 import com.training.startandroid.trapp.database.dao.interfaces.WordsDAO;
 
-/**
- * Created by Администратор on 15.04.2016.
- */
+
 public class DAOFactory {
 
     private static CatalogsDAO catalogsDAO;
@@ -26,7 +24,7 @@ public class DAOFactory {
     */
 
 
-    public synchronized static WordsDAO getWordsDAOInstance() {
+    public synchronized static WordsDAO getWordsDAO() {
 
         if (wordsDAO == null) {
             wordsDAO = new WordsDAOImplSQLite();

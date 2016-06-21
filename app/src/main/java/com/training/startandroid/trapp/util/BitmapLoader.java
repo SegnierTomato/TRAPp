@@ -2,11 +2,14 @@ package com.training.startandroid.trapp.util;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import java.io.File;
 
 
 public class BitmapLoader {
+
+    private static final String LOG_TAG = BitmapLoader.class.getSimpleName();
 
     public static synchronized Bitmap getImage(final String imagePath, final int reqHeight, final int reqWidth, ImageCache imageCache) {
 
@@ -18,11 +21,24 @@ public class BitmapLoader {
 
             BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
 
+            Log.d(LOG_TAG, "reqHeight:" + reqHeight);
+            Log.d(LOG_TAG, "reqWidth:" + reqWidth);
+            Log.d(LOG_TAG, "optionHeight" + options.outHeight);
+            Log.d(LOG_TAG, "optionWidth" + options.outWidth);
+
             options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+            Log.d(LOG_TAG, "sampleSize:" + options.inSampleSize);
+
             addInBitmapOptions(options, imageCache);
             options.inJustDecodeBounds = false;
 
-            return BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
+            Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath(), options);
+
+            Log.d(LOG_TAG, "bitmapHeight:" + bitmap.getHeight());
+            Log.d(LOG_TAG, "bitmapWidth:" + bitmap.getWidth());
+
+            return bitmap;
         }
 
         return null;

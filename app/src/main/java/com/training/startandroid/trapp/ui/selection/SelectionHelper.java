@@ -45,7 +45,7 @@ public final class SelectionHelper {
         setItemSelected(holder, !isItemSelected(holder));
     }
 
-    public void setAllItemsSelected(int countElements) {
+    public void setItemsSelected(int countElements) {
 
         for (int i = 0; i < countElements; i++) {
             if (!mSelectedItems.contains(i)) {

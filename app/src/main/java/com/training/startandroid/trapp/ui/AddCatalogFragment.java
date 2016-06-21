@@ -3,9 +3,11 @@ package com.training.startandroid.trapp.ui;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -20,11 +22,13 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.training.startandroid.trapp.R;
-import com.training.startandroid.trapp.util.BitmapLoader;
-import com.training.startandroid.trapp.util.BitmapLoadingTask;
+import com.training.startandroid.trapp.util.FragmentHelper;
+import com.training.startandroid.trapp.util.ImageFetcher;
 
 public class AddCatalogFragment extends Fragment
         implements View.OnClickListener, View.OnFocusChangeListener {
+
+    private final String LOG_TAG = AddCatalogFragment.class.getSimpleName();
 
     private EditText mInputCatalogName;
     private ImageView mCatalogImage;
@@ -33,14 +37,32 @@ public class AddCatalogFragment extends Fragment
 
     private int SELECT_PHOTO = 1;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    private ImageFetcher mImageFetcher;
+
+    private AddCatalogEventListener mAddCatalogEventListener;
+    private String mImagePath = null;
+
+    private int mImageHeight;
+    private int mImageWidth;
+
+    public AddCatalogFragment(int reqHeight, int reqWidth) {
+
+        mImageHeight = reqHeight;
+        mImageWidth = reqWidth;
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onAttach(Context context) {
+        super.onAttach(context);
+    }
+
+    public void setAddCatalogEventListener(AddCatalogEventListener listener) {
+        mAddCatalogEventListener = listener;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -53,6 +75,7 @@ public class AddCatalogFragment extends Fragment
         mAddButton = (Button) view.findViewById(R.id.add_edit_catalog_button);
         mAddButton.setText("Add");
         mInputLayoutCatalogName = (TextInputLayout) view.findViewById(R.id.input_layout_catalog_name);
+
         return view;
     }
 
@@ -60,12 +83,28 @@ public class AddCatalogFragment extends Fragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        Activity activity = getActivity();
+//        Activity activity = getActivity();
 
         mAddButton.setOnClickListener(this);
         mCatalogImage.setOnClickListener(this);
         mInputCatalogName.setOnFocusChangeListener(this);
 
+        mImageFetcher = new ImageFetcher(getFragmentManager());
+
+    }
+
+    @Override
+    public void onPause() {
+        Log.d(LOG_TAG, "onPause");
+        mImageFetcher.setPauseBackgroundLoadingTask(true);
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d(LOG_TAG, "onDestroy");
+        mImageFetcher.setExitTasksEarly(true);
+        super.onDestroy();
     }
 
     @Override
@@ -74,7 +113,11 @@ public class AddCatalogFragment extends Fragment
             case R.id.add_edit_catalog_button:
 
                 if (validateName()) {
+                    if (mAddCatalogEventListener != null) {
+                        mAddCatalogEventListener.addNewCatalog(mInputCatalogName.getText().toString(), mImagePath);
+                    }
 
+                    FragmentHelper.closeFragment(getFragmentManager());
                 }
                 break;
 
@@ -98,10 +141,16 @@ public class AddCatalogFragment extends Fragment
                 Uri selectedImageUri = data.getData();
                 String imagePath = getPathFromUri(selectedImageUri);
 
-//                BitmapLoader.getImage(imagePath, mCatalogImage.getHeight(), mCatalogImage.getWidth());
+                if (imagePath != null) {
 
-                BitmapLoadingTask bitmapTask = new BitmapLoadingTask(mCatalogImage);
-                bitmapTask.execute(imagePath);
+                    if (mImageHeight < 0 || mImageWidth < 0) {
+                        mImageHeight = mCatalogImage.getHeight();
+                        mImageWidth = mCatalogImage.getWidth();
+                    }
+
+                    mImageFetcher.loadImage(mCatalogImage, mImageHeight, mImageWidth, imagePath);
+                    mImagePath = imagePath;
+                }
 
             }
         }
@@ -178,4 +227,7 @@ public class AddCatalogFragment extends Fragment
 //        }
 //    }
 
+    public interface AddCatalogEventListener {
+        public void addNewCatalog(String catalogName, String imagePath);
+    }
 }

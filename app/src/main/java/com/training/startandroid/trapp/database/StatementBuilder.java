@@ -10,11 +10,11 @@ import com.training.startandroid.trapp.util.Constants;
 public class StatementBuilder {
 
     private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_CATALOGS = "INSERT INTO catalogs (name) VALUES (?)";
-    private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_CATALOG_IMAGE = "INSERT INTO catalogs (id_catalog, image_path) VALUES (?,?)";
+    private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_CATALOG_IMAGE = "INSERT INTO catalogs_image (id_catalog, image_path) VALUES (?,?)";
 
     private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_WORDS = "INSERT INTO words (word) VALUES (?)";
-    private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_WORD_IMAGE = "INSERT INTO word_image (id_word, image_path) VALUES (?,?)";
-    private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_WORD_SOUND = "INSERT INTO word_sound (id_word, sound_path) VALUES (?,?)";
+    private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_WORD_IMAGE = "INSERT INTO words_image (id_word, image_path) VALUES (?,?)";
+    private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_WORD_SOUND = "INSERT INTO words_sound (id_word, sound_path) VALUES (?,?)";
 
     private static final String SQLITE_STATEMENT_INSERT_IN_TABLE_CATALOGS_AND_WORDS_RELATIONS = "INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (?,?)";
 
@@ -39,16 +39,16 @@ public class StatementBuilder {
 
     private static final String SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_CATALOG_IMAGE = "DELETE FROM catalog_image WHERE id_catalog = ?";
 
-    private static final String SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_WORD_IMAGE = "DELETE FROM word_image WHERE id_word = ?";
-    private static final String SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_WORD_SOUND = "DELETE FROM word_sound WHERE id_word = ?";
+    private static final String SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_WORD_IMAGE = "DELETE FROM words_image WHERE id_word = ?";
+    private static final String SQLITE_STATEMENT_DELETE_ROW_IN_TABLE_WORD_SOUND = "DELETE FROM words_sound WHERE id_word = ?";
 
 
     private static final String SQLITE_STATEMENT_UPDATE_TABLE_CATALOGS = "UPDATE catalogs SET name = ? where id_catalog = ?";
-    private static final String SQLITE_STATEMENT_UPDATE_TABLE_CATALOG_IMAGE = "UPDATE catalog_image SET image_path = ? where id_catalog = ?";
+    private static final String SQLITE_STATEMENT_UPDATE_TABLE_CATALOG_IMAGE = "UPDATE catalogs_image SET image_path = ? where id_catalog = ?";
 
     private static final String SQLITE_STATEMENT_UPDATE_TABLE_WORDS = "UPDATE words SET word = ? where id_word = ?";
-    private static final String SQLITE_STATEMENT_UPDATE_TABLE_WORD_IMAGE = "UPDATE word_image SET image_path = ? where id_word = ?";
-    private static final String SQLITE_STATEMENT_UPDATE_TABLE_WORD_SOUND = "UPDATE word_sound SET sound_path = ? where id_word = ?";
+    private static final String SQLITE_STATEMENT_UPDATE_TABLE_WORD_IMAGE = "UPDATE words_image SET image_path = ? where id_word = ?";
+    private static final String SQLITE_STATEMENT_UPDATE_TABLE_WORD_SOUND = "UPDATE words_sound SET sound_path = ? where id_word = ?";
 
     private static final String SQLITE_STATEMENT_UPDATE_TABLE_TRANSLATED_WORDS = "UPDATE translate_words SET translate_word = ?, part_of_speech=? where id_translate = ?";
 

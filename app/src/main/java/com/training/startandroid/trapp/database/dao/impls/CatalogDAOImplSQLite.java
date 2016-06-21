@@ -22,17 +22,17 @@ import java.util.Set;
 public class CatalogDAOImplSQLite implements CatalogsDAO {
 
     @Override
-    public Constants.ResultStatusDatabase addCatalog(Catalog newCatalog) {
+    public Constants.ResultAddStatusDatabase addCatalog(Catalog newCatalog) {
 
         Object[][] parameters = new Object[1][];
-        parameters[1] = new Object[]{newCatalog.getName()};
+        parameters[0] = new Object[]{newCatalog.getName()};
 
         DBHelper dbHelper = DatabaseConnection.getInstanceDBHelper();
         List<Integer> listIdAdd2Catalog = dbHelper.executeInsertQuery(Constants.ActionStatement.INSERT_NEW_CATALOG, parameters);
 
-        if (listIdAdd2Catalog==null) {
-            return Constants.ResultStatusDatabase.CAN_NOT_ADD_RECORD;
-        }else{
+        if (listIdAdd2Catalog == null) {
+            return Constants.ResultAddStatusDatabase.CAN_NOT_ADD_RECORD;
+        } else {
             newCatalog.setId(listIdAdd2Catalog.get(0));
         }
 
@@ -41,39 +41,45 @@ public class CatalogDAOImplSQLite implements CatalogsDAO {
             parameters[0] = new Object[]{newCatalog.getId(), newCatalog.getImagePath()};
             List<Integer> listIdCatalogAdd2Image = dbHelper.executeInsertQuery(Constants.ActionStatement.INSERT_NEW_CATALOG_IMAGE, parameters);
 
-            if (listIdCatalogAdd2Image==null) {
-                return Constants.ResultStatusDatabase.CAN_NOT_ADD_IMAGE;
+            if (listIdCatalogAdd2Image == null) {
+                return Constants.ResultAddStatusDatabase.CAN_NOT_ADD_IMAGE;
             }
         }
 
-        return Constants.ResultStatusDatabase.ADD_SUCCESSFUL;
+        return Constants.ResultAddStatusDatabase.ADD_SUCCESSFUL;
     }
 
     @Override
-    public boolean updateCatalogName(Catalog catalog) {
+    public Constants.ResultUpdateStatusDatabase updateCatalog(Catalog updateCatalog) {
 
         Object[][] parameters = new Object[1][];
-        parameters[0] = new Object[]{catalog.getName(), catalog.getId()};
-        return updateDeleteCatalog(Constants.ActionStatement.UPDATE_CATALOG_NAME, parameters);
-    }
+        parameters[0] = new Object[]{updateCatalog.getName(), updateCatalog.getId()};
+        boolean resultUpdateName = updateDeleteCatalog(Constants.ActionStatement.UPDATE_CATALOG_NAME, parameters);
 
-    @Override
-    public boolean updateCatalogImage(Catalog catalog) {
+        boolean resultUpdateImage;
 
-        Object[][] parameters = new Object[1][];
-
-        if (catalog.getImagePath() == null) {
-            parameters[0] = new Object[]{catalog.getId()};
-            return updateDeleteCatalog(Constants.ActionStatement.DELETE_CATALOG_IMAGE, parameters);
+        if (updateCatalog.getImagePath() == null) {
+            parameters[0] = new Object[]{updateCatalog.getId()};
+            resultUpdateImage = updateDeleteCatalog(Constants.ActionStatement.DELETE_CATALOG_IMAGE, parameters);
+        } else {
+            parameters[0] = new Object[]{updateCatalog.getImagePath(), updateCatalog.getId()};
+            resultUpdateImage = updateDeleteCatalog(Constants.ActionStatement.UPDATE_CATALOG_IMAGE, parameters);
         }
 
-        parameters[0] = new Object[]{catalog.getImagePath(), catalog.getId()};
-        return updateDeleteCatalog(Constants.ActionStatement.UPDATE_CATALOG_IMAGE, parameters);
+        if (!resultUpdateName && !resultUpdateImage) {
+            return Constants.ResultUpdateStatusDatabase.CAN_NOT_UPDATE_RECORD;
+        } else if (resultUpdateName && !resultUpdateImage) {
+            return Constants.ResultUpdateStatusDatabase.CAN_NOT_UPDATE_IMAGE;
+        } else if (!resultUpdateName && resultUpdateImage) {
+            return Constants.ResultUpdateStatusDatabase.CAN_NOT_UPDATE_NAME;
+        }
+
+        return Constants.ResultUpdateStatusDatabase.UPDATE_SUCCESSFUL;
     }
 
     @Override
     public boolean removeCatalogById(final int catalogId) {
-        Object [][]parameters = new Object[1][];
+        Object[][] parameters = new Object[1][];
         parameters[0] = new Object[]{catalogId};
         return updateDeleteCatalog(Constants.ActionStatement.DELETE_CATALOG, parameters);
     }
@@ -98,7 +104,9 @@ public class CatalogDAOImplSQLite implements CatalogsDAO {
         Catalog catalog;
 
         for (Integer id : idCatalogs) {
+
             while (iterator.hasNext()) {
+
                 catalog = iterator.next();
                 if (catalog.getId() == id.intValue()) {
                     catalog.setImagePath(imagesPath.get(id));
@@ -117,7 +125,7 @@ public class CatalogDAOImplSQLite implements CatalogsDAO {
         final int result = dbHelper.executeUpdateDeleteQuery(actionStatement, parameters);
 
 //        return result != -1?true:false;
-        return result!=-1;
+        return result != -1;
     }
 
 }
@@ -129,7 +137,7 @@ class CatalogConverter implements CursorConverter {
 
         List<Catalog> listCatalogs = new ArrayList<>();
 
-        if(cursor==null){
+        if (cursor == null) {
             return listCatalogs;
         }
 
@@ -156,7 +164,7 @@ class CatalogImageConverter implements CursorConverter {
 
         Map<Integer, String> imagesPath = new HashMap<>();
 
-        if(cursor==null){
+        if (cursor == null) {
             return imagesPath;
         }
 

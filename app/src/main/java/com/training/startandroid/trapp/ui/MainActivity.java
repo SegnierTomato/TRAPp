@@ -26,13 +26,15 @@ import android.view.MenuItem;
 import android.widget.RelativeLayout;
 
 import com.training.startandroid.trapp.R;
+import com.training.startandroid.trapp.model.Catalog;
+import com.training.startandroid.trapp.util.FragmentHelper;
+import com.training.startandroid.trapp.util.ImageCache;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private final String LOG_TAG = "class MainActivity";
-    private RelativeLayout mFragmentParentLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,24 +59,29 @@ public class MainActivity extends AppCompatActivity
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-                int countFragment = fragmentManager.getBackStackEntryCount();
-
-                final String tag = fragmentManager.getBackStackEntryAt(countFragment - 1).getName();
-                Fragment currentFragment = fragmentManager.findFragmentByTag(tag);
+                final Fragment currentFragment = FragmentHelper.getHigherFragmentInStack(fragmentManager);
 
                 if (currentFragment != null) {
+
                     fragmentTransaction.hide(currentFragment);
+
+                    final CatalogsViewFragment catalogViewFragment = (CatalogsViewFragment) currentFragment;
+                    int[] imageSize = catalogViewFragment.getImageSize();
+                    int imageHeight = imageSize[0];
+                    int imageWidth = imageSize[1];
+
+                    Fragment addFragment = new AddCatalogFragment(imageHeight, imageWidth);
+
+                    final String currentOperationTag = AddCatalogFragment.class.getName();
+
+                    fragmentTransaction.add(R.id.fragment_parent_layout, addFragment, currentOperationTag);
+
+                    fragmentTransaction.addToBackStack(currentOperationTag);
+                    fragmentTransaction.commit();
+
+                    AddCatalogFragment addCatalogFragment = (AddCatalogFragment) addFragment;
+                    addCatalogFragment.setAddCatalogEventListener(catalogViewFragment);
                 }
-
-                Fragment addCatalogFragment = new AddCatalogFragment();
-
-                final String currentOperationTag = AddCatalogFragment.class.getName();
-                fragmentTransaction.add(R.id.fragment_parent_layout, addCatalogFragment, currentOperationTag);
-
-                fragmentTransaction.addToBackStack(currentOperationTag);
-                fragmentTransaction.commit();
-
-                Log.d("Fragment fab stack coun", fragmentManager.getBackStackEntryCount() + "");
 
             }
         });
@@ -91,53 +98,17 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 //        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        mFragmentParentLayout = (RelativeLayout) findViewById(R.id.fragment_parent_layout);
-
 
         FragmentManager fragmentManager = getFragmentManager();
-
-//        FragmentsOnBackStackListener backStackListener = new FragmentsOnBackStackListener();
-
         FragmentTransaction transaction = fragmentManager.beginTransaction();
 
         CatalogsViewFragment catalogsViewFragment = new CatalogsViewFragment();
         final String tag = CatalogsViewFragment.class.getName();
 //        transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right);
-        transaction.add(R.id.fragment_parent_layout, catalogsViewFragment,tag);
+        transaction.add(R.id.fragment_parent_layout, catalogsViewFragment, tag);
 
         transaction.addToBackStack(tag);
         transaction.commit();
-
-    }
-
-    private void getBackPreviousFragment(Fragment currentFragment, Fragment previousFragment) {
-
-        try {
-            FragmentManager fragmentManager = getFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-            if (currentFragment != null) {
-//            fragmentTransaction.hide(currentFragment);
-                fragmentTransaction.remove(currentFragment);
-            }
-
-            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
-
-            if (previousFragment != null) {
-                fragmentTransaction.show(previousFragment);
-            }
-
-            int count = fragmentManager.getBackStackEntryCount();
-            fragmentManager.popBackStackImmediate();
-            count = fragmentManager.getBackStackEntryCount();
-
-//            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.commit();
-
-
-        } catch (Exception ex) {
-            Log.e(LOG_TAG, ex.toString());
-        }
 
     }
 
@@ -154,15 +125,12 @@ public class MainActivity extends AppCompatActivity
 
         if (countFragments != 1) {
 
-            final String tagCurrent = fragmentManager.getBackStackEntryAt(countFragments - 1).getName();
-            final String tagPrevious = fragmentManager.getBackStackEntryAt(countFragments - 2).getName();
-            Fragment currentFragment = fragmentManager.findFragmentByTag(tagCurrent);
-            Fragment previousFragment = fragmentManager.findFragmentByTag(tagPrevious);
+            Fragment currentFragment = FragmentHelper.getHigherFragmentInStack(fragmentManager);
+            Fragment previousFragment = FragmentHelper.getPreviousFragmentInBaclStack(fragmentManager);
 
-            getBackPreviousFragment(currentFragment, previousFragment);
+            FragmentHelper.getBackPreviousFragment(currentFragment, previousFragment, fragmentManager);
 
         } else {
-
             super.onBackPressed();
         }
 
@@ -180,10 +148,9 @@ public class MainActivity extends AppCompatActivity
 
         int id = item.getItemId();
         switch (id) {
-            case R.id.action_remove:
+            case R.id.action_search:
                 return true;
-            case R.id.action_edit:
-                return true;
+
             case R.id.action_setting:
                 return true;
             default:
@@ -226,21 +193,4 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
     }
 
-    class FragmentsOnBackStackListener implements FragmentManager.OnBackStackChangedListener {
-
-        @Override
-        public void onBackStackChanged() {
-
-            FragmentManager fragmentManager = getFragmentManager();
-
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-            for (int i = 0; i < fragmentManager.getBackStackEntryCount(); i++) {
-                int id = fragmentManager.getBackStackEntryAt(i).getId();
-                Fragment fragment = fragmentManager.findFragmentById(id);
-            }
-
-            fragmentTransaction.commit();
-        }
-    }
 }

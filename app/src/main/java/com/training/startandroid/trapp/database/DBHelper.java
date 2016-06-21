@@ -16,7 +16,9 @@ import java.util.List;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    private final static String ERROR_TAG = "Exception: ";
+    private final static String LOG_TAG = DBHelper.class.getSimpleName();
+    private final String PRAGMA_INSTRUCTION = "PRAGMA foreign_keys=ON";
+
     private SQLiteDatabase sqLiteDatabase;
 
     public DBHelper(Context context) {
@@ -25,6 +27,13 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public DBHelper(Context context, SQLiteDatabase.CursorFactory factory) {
         super(context, Constants.DB_SQLITE_NAME, factory, Constants.DB_VERSION);
+    }
+
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+        super.onOpen(db);
+        Log.d(LOG_TAG, " onOpen");
+        db.execSQL(PRAGMA_INSTRUCTION);
     }
 
     public void open() {
@@ -67,7 +76,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
             db.setTransactionSuccessful();
         } catch (Exception ex) {
-            Log.d(ERROR_TAG, ex.toString());
+            Log.d(LOG_TAG, ex.toString());
         } finally {
             db.endTransaction();
         }
@@ -88,7 +97,7 @@ public class DBHelper extends SQLiteOpenHelper {
              */
             cursor = sqLiteDatabase.rawQuery(query, parameter);
         } catch (Exception ex) {
-            Log.d(ERROR_TAG, ex.toString());
+            Log.d(LOG_TAG, ex.toString());
         } finally {
             return converter.convert(cursor);
         }
@@ -115,7 +124,7 @@ public class DBHelper extends SQLiteOpenHelper {
             return count;
 
         } catch (Exception ex) {
-            Log.e(ERROR_TAG, ex.toString());
+            Log.e(LOG_TAG, ex.toString());
             return -1;
         } finally {
             sqLiteDatabase.endTransaction();
@@ -143,7 +152,7 @@ public class DBHelper extends SQLiteOpenHelper {
             return listInsertId;
 
         } catch (Exception ex) {
-            Log.e(ERROR_TAG, ex.toString());
+            Log.e(LOG_TAG, ex.toString());
             return null;
         } finally {
             sqLiteDatabase.endTransaction();

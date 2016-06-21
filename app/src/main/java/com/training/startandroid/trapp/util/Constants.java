@@ -3,6 +3,9 @@ package com.training.startandroid.trapp.util;
 
 public final class Constants {
 
+    private Constants(){
+    }
+
     public static final String CREATE_SQLITE_TABLE_CATALOGS = "CREATE TABLE catalogs (" +
             "id_catalog INTEGER PRIMARY KEY AUTOINCREMENT , " +
             "name TEXT NOT NULL COLLATE NOCASE, " +
@@ -189,12 +192,21 @@ public final class Constants {
         UPDATE_TRANSLETED_WORD
     }
 
-    public enum ResultStatusDatabase{
+    public enum ResultAddStatusDatabase {
         ADD_SUCCESSFUL,
         CAN_NOT_ADD_RECORD,
         CAN_NOT_ADD_IMAGE,
         CAN_NOT_ADD_SOUND,
         CAN_NOT_ADD_IMAGE_AND_SOUND
+    }
+
+    public enum ResultUpdateStatusDatabase{
+        UPDATE_SUCCESSFUL,
+        CAN_NOT_UPDATE_RECORD,
+        CAN_NOT_UPDATE_IMAGE,
+        CAN_NOT_UPDATE_SOUND,
+        CAN_NOT_UPDATE_NAME,
+        CAN_NOT_UPDATE_IMAGE_AND_SOUND
     }
 
     public enum SpecificDictionary{
@@ -206,15 +218,15 @@ public final class Constants {
     public static final String SQLITE_SELECT_QUERY_FROM_TABLE_CATALOGS_AND_WORDS_RELATIONS = "SELECT id_word FROM catalogs_and_words_relations WHERE id_catalog=?";
 
     public static final String SQLITE_SELECT_QUERY_FROM_TABLE_CATALOGS = "SELECT * FROM catalogs";
-    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_CATALOG_IMAGE = "SELECT * FROM catalog_image";
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_CATALOG_IMAGE = "SELECT * FROM catalogs_image";
 
     public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORDS_BY_ID_WORD = "SELECT * FROM words WHERE id_word=?";
-    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORD_IMAGE_BY_ID_WORD = "SELECT image_path FROM word_image WHERE id_word=?";
-    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORD_SOUND_BY_ID_WORD = "SELECT sound_path FROM word_sound WHERE id_word=?";
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORD_IMAGE_BY_ID_WORD = "SELECT image_path FROM words_image WHERE id_word=?";
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORD_SOUND_BY_ID_WORD = "SELECT sound_path FROM words_sound WHERE id_word=?";
 
     public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORDS = "SELECT * FROM words";
-    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORD_IMAGE = "SELECT * FROM word_image";
-    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORD_SOUND = "SELECT * FROM word_sound";
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORD_IMAGE = "SELECT * FROM words_image";
+    public static final String SQLITE_SELECT_QUERY_FROM_TABLE_WORD_SOUND = "SELECT * FROM words_sound";
 
     public static final String SQLITE_SELECT_QUERY_FROM_TABLE_GOOGLE_TRANSLATE = "SELECT id_translate FROM google_translate";
     public static final String SQLITE_SELECT_QUERY_FROM_TABLE_YANDEX_TRANSLATE = "SELECT id_translate FROM yandex_translate";

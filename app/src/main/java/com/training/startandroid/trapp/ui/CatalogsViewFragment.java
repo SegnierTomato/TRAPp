@@ -2,27 +2,21 @@ package com.training.startandroid.trapp.ui;
 
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-
-import android.support.v7.view.ActionMode;
-//import android.view.ActionMode;
-
-import android.support.v7.widget.Toolbar;
-//import android.widget.Toolbar;
-
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
-
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
@@ -32,20 +26,26 @@ import com.training.startandroid.trapp.database.dao.DAOFactory;
 import com.training.startandroid.trapp.model.Catalog;
 import com.training.startandroid.trapp.ui.selection.SelectionHelper;
 import com.training.startandroid.trapp.ui.selection.SelectionObserver;
+import com.training.startandroid.trapp.util.Constants;
+import com.training.startandroid.trapp.util.FragmentHelper;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
-public class CatalogsViewFragment extends android.app.Fragment {
+public class CatalogsViewFragment extends android.app.Fragment
+        implements AddCatalogFragment.AddCatalogEventListener, EditCatalogFragment.EditCatalogEventListener {
 
-    private final String LOG_TAG = "CatalogsVFr";
+    private final String LOG_TAG = CatalogsViewFragment.class.getSimpleName();
 
     private final ActionModeCallback mActionModeCallback = new ActionModeCallback();
     private SelectableRecyclerViewAdapter mAdapter;
     private ActionMode mActionMode;
     private Context mContext;
+
+    private int mImageHeight;
+    private int mImageWidth;
 
     private static boolean isTablet(Context context) {
 
@@ -64,16 +64,6 @@ public class CatalogsViewFragment extends android.app.Fragment {
         }
 
         return columnCount;
-    }
-
-    private List<Catalog> initializeListCatalogs(int count) {
-        List<Catalog> listCatalogs = new ArrayList<>();
-
-        for (int i = 0; i < count; i++) {
-            Catalog newCatalog = new Catalog(i + 1, "Test Catalog " + (i + 1), new Date());
-            listCatalogs.add(newCatalog);
-        }
-        return listCatalogs;
     }
 
     @Override
@@ -95,14 +85,12 @@ public class CatalogsViewFragment extends android.app.Fragment {
         super.onActivityCreated(savedInstanceState);
 
         Activity activity = getActivity();
-
         mContext = activity.getApplicationContext();
 
         DatabaseConnection.initializeConnection(mContext);
         DatabaseConnection.openConnection();
-//        List<Catalog> listCatalogs = DAOFactory.getCatalogsDAO().getAllCatalogs();
+        List<Catalog> listCatalogs = DAOFactory.getCatalogsDAO().getAllCatalogs();
 
-        List<Catalog> listCatalogs = initializeListCatalogs(50);
         mAdapter = new SelectableRecyclerViewAdapter(this, listCatalogs);
 
         RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.recycler_view);
@@ -111,6 +99,10 @@ public class CatalogsViewFragment extends android.app.Fragment {
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
         recyclerView.setItemAnimator(itemAnimator);
         recyclerView.setAdapter(mAdapter);
+
+        int[] imageSize = mAdapter.getImageSize();
+        mImageHeight = imageSize[0];
+        mImageWidth = imageSize[1];
     }
 
     @Override
@@ -126,9 +118,39 @@ public class CatalogsViewFragment extends android.app.Fragment {
         Log.d("Fragment", "onResume");
     }
 
+    public int[] getImageSize() {
+        return new int[]{mImageHeight, mImageWidth};
+    }
+
     public void startActionMode() {
         MainActivity parentActivity = (MainActivity) getActivity();
         mActionMode = parentActivity.startSupportActionMode(mActionModeCallback);
+    }
+
+    @Override
+    public void addNewCatalog(String catalogName, String imagePath) {
+
+        Log.d(LOG_TAG, " addNewCatalog");
+        Log.d(LOG_TAG, "" + imagePath);
+        Catalog newCatalog = new Catalog(catalogName, imagePath);
+        Constants.ResultAddStatusDatabase resultInserting = DAOFactory.getCatalogsDAO().addCatalog(newCatalog);
+        Toast.makeText(mContext, resultInserting.toString(), Toast.LENGTH_SHORT).show();
+
+        newCatalog.setDate(new Date());
+        mAdapter.addNewItem(newCatalog);
+    }
+
+    public void editCatalog(Catalog editCatalog) {
+
+        Constants.ResultUpdateStatusDatabase resultUpdating = DAOFactory.getCatalogsDAO().updateCatalog(editCatalog);
+        Toast.makeText(mContext, resultUpdating.toString(), Toast.LENGTH_SHORT).show();
+
+//        mAdapter.editItem();
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
     }
 
     public ActionMode getActionMode() {
@@ -171,8 +193,10 @@ public class CatalogsViewFragment extends android.app.Fragment {
                 case R.id.action_remove:
 
                     HashSet<Integer> selectedPositions = selectionHelper.getSelectedItemsPositions();
+
                     for (Integer position : selectedPositions) {
-//                        DAOFactory.getCatalogsDAO().removeCatalogById(position);
+                        Catalog selectedCatalog = mAdapter.getElement(position);
+                        DAOFactory.getCatalogsDAO().removeCatalogById(selectedCatalog.getId());
                     }
                     mAdapter.removeSelectedItems();
 
@@ -183,17 +207,52 @@ public class CatalogsViewFragment extends android.app.Fragment {
 
                 case R.id.action_edit:
 
-                    FragmentManager fragmentManager = getFragmentManager();
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-                    EditCatalogFragment editCatalogFragment = new EditCatalogFragment();
-                    fragmentTransaction.add(editCatalogFragment, EditCatalogFragment.class.getName());
-                    fragmentTransaction.commit();
+                    HashSet<Integer> selectedItems = selectionHelper.getSelectedItemsPositions();
+                    Iterator<Integer> iterator = selectedItems.iterator();
+
+                    if (iterator.hasNext()) {
+                        int positionEditItem = iterator.next();
+                        Catalog editElement = mAdapter.getElement(positionEditItem);
+
+
+                        FragmentManager fragmentManager = getFragmentManager();
+
+//                        if () {
+//                            = getFragmentManager();
+//                        } else {
+//                            getChildFragmentManager();
+//                        }
+
+
+                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                        Fragment currentFragment = FragmentHelper.getHigherFragmentInStack(fragmentManager);
+
+                        if (currentFragment != null) {
+
+                            fragmentTransaction.hide(currentFragment);
+                            final String currentOperationTag = EditCatalogFragment.class.getName();
+
+//                            EditCatalogFragment editCatalogFragment = new EditCatalogFragment(editElement, mImageHeight, mImageWidth);
+//                            fragmentTransaction.add(editCatalogFragment, currentOperationTag);
+
+                            AddCatalogFragment addCatalogFragment = new AddCatalogFragment(mImageHeight, mImageWidth);
+                            fragmentTransaction.add(addCatalogFragment, currentOperationTag);
+
+                            FragmentTransaction tr = fragmentTransaction.addToBackStack(currentOperationTag);
+                            if (tr == null) {
+                                Log.d(LOG_TAG, "Fragment transaction = null");
+                            }
+
+                            fragmentTransaction.commit();
+
+                        }
+                    }
 
                     break;
 
                 case R.id.action_select_all:
-
                     mAdapter.selectAllItems();
                     break;
 

@@ -22,7 +22,7 @@ import java.util.Set;
 public class WordsDAOImplSQLite implements WordsDAO {
 
     @Override
-    public Constants.ResultStatusDatabase addWord(Word newWord) {
+    public Constants.ResultAddStatusDatabase addWord(Word newWord) {
 
         Object[][] parameters = new Object[1][];
         parameters[0] = new Object[]{newWord.getWord()};
@@ -33,7 +33,7 @@ public class WordsDAOImplSQLite implements WordsDAO {
         if (listIdAddWords != null) {
             newWord.setId(listIdAddWords.get(0).intValue());
         } else {
-            return Constants.ResultStatusDatabase.CAN_NOT_ADD_RECORD;
+            return Constants.ResultAddStatusDatabase.CAN_NOT_ADD_RECORD;
         }
 
         List<Integer> listIdAddImage2Word = null;
@@ -52,14 +52,14 @@ public class WordsDAOImplSQLite implements WordsDAO {
         }
 
         if (listIdAddImage2Word == null && listIdAddSound2Word == null) {
-            return Constants.ResultStatusDatabase.CAN_NOT_ADD_IMAGE_AND_SOUND;
+            return Constants.ResultAddStatusDatabase.CAN_NOT_ADD_IMAGE_AND_SOUND;
         } else if (listIdAddImage2Word == null) {
-            return Constants.ResultStatusDatabase.CAN_NOT_ADD_IMAGE;
+            return Constants.ResultAddStatusDatabase.CAN_NOT_ADD_IMAGE;
         } else if (listIdAddSound2Word == null) {
-            return Constants.ResultStatusDatabase.CAN_NOT_ADD_SOUND;
+            return Constants.ResultAddStatusDatabase.CAN_NOT_ADD_SOUND;
         }
 
-        return Constants.ResultStatusDatabase.ADD_SUCCESSFUL;
+        return Constants.ResultAddStatusDatabase.ADD_SUCCESSFUL;
     }
 
     @Override

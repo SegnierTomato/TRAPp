@@ -5,16 +5,12 @@ import com.training.startandroid.trapp.util.Constants;
 
 import java.util.List;
 
-/**
- * Created by Администратор on 15.04.2016.
- */
+
 public interface CatalogsDAO {
 
-    public Constants.ResultStatusDatabase addCatalog(Catalog newCatalog);
+    public Constants.ResultAddStatusDatabase addCatalog(Catalog newCatalog);
 
-    public boolean updateCatalogName(Catalog catalog);
-
-    public boolean updateCatalogImage(Catalog catalog);
+    public Constants.ResultUpdateStatusDatabase updateCatalog(Catalog updateCatalog);
 
     public boolean removeCatalogById(final int catalogId);
 

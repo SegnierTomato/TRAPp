@@ -21,7 +21,7 @@ public class ImageCache {
      * I use cache size in kBs
      */
     private static final int DEFAULT_MEMORY_CACHE_SIZE = 1024 * 5; // 5 MB
-    private static final String TAG = "ImageCache";
+//    private static final String TAG = "ImageCache";
 
     private LruCache<String, Bitmap> memoryCache;
     private Set<SoftReference<Bitmap>> reusableBitmaps;
@@ -160,11 +160,11 @@ public class ImageCache {
 
     private static RetainFragment findOrCreateRetainFragment(FragmentManager fragmentManager) {
 
-        RetainFragment retainFragment  = (RetainFragment) fragmentManager.findFragmentByTag(TAG);
+        RetainFragment retainFragment  = (RetainFragment) fragmentManager.findFragmentByTag(RetainFragment.class.getName());
 
         if(retainFragment == null){
             retainFragment = new RetainFragment();
-            fragmentManager.beginTransaction().add(retainFragment, TAG).commitAllowingStateLoss();
+            fragmentManager.beginTransaction().add(retainFragment, RetainFragment.class.getName()).commitAllowingStateLoss();
         }
         return retainFragment;
     }

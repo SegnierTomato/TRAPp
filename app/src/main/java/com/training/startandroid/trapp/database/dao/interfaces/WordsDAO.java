@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface WordsDAO {
 
-    public Constants.ResultStatusDatabase addWord(Word newWord);
+    public Constants.ResultAddStatusDatabase addWord(Word newWord);
 
     public boolean updateWord(Word word);
 
