@@ -1,11 +1,12 @@
 package com.training.startandroid.trapp.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 
-public class Catalog {
+public class Catalog implements Serializable {
 
     private int id = -1;
 

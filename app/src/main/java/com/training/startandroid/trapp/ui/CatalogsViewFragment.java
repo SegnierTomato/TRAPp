@@ -2,9 +2,9 @@ package com.training.startandroid.trapp.ui;
 
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.FragmentManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -18,6 +18,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.training.startandroid.trapp.R;
@@ -34,10 +36,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-public class CatalogsViewFragment extends android.app.Fragment
+public class CatalogsViewFragment extends Fragment
         implements AddCatalogFragment.AddCatalogEventListener, EditCatalogFragment.EditCatalogEventListener {
 
     private final String LOG_TAG = CatalogsViewFragment.class.getSimpleName();
+
+    private final String []bundleArgsKeysForEditCatalogs = {"editCatalog", "reqHeight", "reqWidth"};
 
     private final ActionModeCallback mActionModeCallback = new ActionModeCallback();
     private SelectableRecyclerViewAdapter mAdapter;
@@ -46,6 +50,8 @@ public class CatalogsViewFragment extends android.app.Fragment
 
     private int mImageHeight;
     private int mImageWidth;
+
+    private RecyclerView recyclerView;
 
     private static boolean isTablet(Context context) {
 
@@ -76,6 +82,9 @@ public class CatalogsViewFragment extends android.app.Fragment
 
         Log.d(LOG_TAG, "onCreateView");
         View view = inflater.inflate(R.layout.recycler_view, container, false);
+
+        recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+
         return view;
     }
 
@@ -103,6 +112,8 @@ public class CatalogsViewFragment extends android.app.Fragment
         int[] imageSize = mAdapter.getImageSize();
         mImageHeight = imageSize[0];
         mImageWidth = imageSize[1];
+
+        Log.d("AddCatalogFragment", "hash Code CatalogsViewFragment fragments: " + this.hashCode());
     }
 
     @Override
@@ -148,12 +159,16 @@ public class CatalogsViewFragment extends android.app.Fragment
 //        mAdapter.editItem();
     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void setVisible(boolean visible) {
+
+        if (visible) {
+            recyclerView.setVisibility(View.VISIBLE);
+        } else {
+            recyclerView.setVisibility(View.GONE);
+        }
     }
 
-    public ActionMode getActionMode() {
+     public ActionMode getActionMode() {
         return mActionMode;
     }
 
@@ -207,7 +222,6 @@ public class CatalogsViewFragment extends android.app.Fragment
 
                 case R.id.action_edit:
 
-
                     HashSet<Integer> selectedItems = selectionHelper.getSelectedItemsPositions();
                     Iterator<Integer> iterator = selectedItems.iterator();
 
@@ -215,39 +229,46 @@ public class CatalogsViewFragment extends android.app.Fragment
                         int positionEditItem = iterator.next();
                         Catalog editElement = mAdapter.getElement(positionEditItem);
 
+                        final String currentOperationTag = EditCatalogFragment.class.getName();
 
-                        FragmentManager fragmentManager = getFragmentManager();
+                        recyclerView.setVisibility(View.GONE);
+                        mActionMode.finish();
 
-//                        if () {
-//                            = getFragmentManager();
-//                        } else {
-//                            getChildFragmentManager();
-//                        }
-
-
+                        FragmentManager fragmentManager = getChildFragmentManager();
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-                        Fragment currentFragment = FragmentHelper.getHigherFragmentInStack(fragmentManager);
+                        EditCatalogFragment editCatalogFragment = new EditCatalogFragment();
 
-                        if (currentFragment != null) {
+                        Bundle args = new Bundle();
+                        args.putSerializable(bundleArgsKeysForEditCatalogs[0], editElement);
+                        args.putInt(bundleArgsKeysForEditCatalogs[1], mImageHeight);
+                        args.putInt(bundleArgsKeysForEditCatalogs[2], mImageWidth);
 
-                            fragmentTransaction.hide(currentFragment);
-                            final String currentOperationTag = EditCatalogFragment.class.getName();
+                        editCatalogFragment.setArguments(args);
 
-//                            EditCatalogFragment editCatalogFragment = new EditCatalogFragment(editElement, mImageHeight, mImageWidth);
-//                            fragmentTransaction.add(editCatalogFragment, currentOperationTag);
+                        fragmentTransaction.add(R.id.parent_for_children_fragments, editCatalogFragment, currentOperationTag);
 
-                            AddCatalogFragment addCatalogFragment = new AddCatalogFragment(mImageHeight, mImageWidth);
-                            fragmentTransaction.add(addCatalogFragment, currentOperationTag);
+                        fragmentTransaction.addToBackStack(currentOperationTag);
+                        fragmentTransaction.commit();
 
-                            FragmentTransaction tr = fragmentTransaction.addToBackStack(currentOperationTag);
-                            if (tr == null) {
-                                Log.d(LOG_TAG, "Fragment transaction = null");
+                        editCatalogFragment.setEditCatalogEventListener(CatalogsViewFragment.this);
+
+                        fragmentManager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+
+                            @Override
+                            public void onBackStackChanged() {
+                                Log.d(LOG_TAG, "Back Press");
+
+                                if (getChildFragmentManager().getBackStackEntryCount() == 0) {
+                                    Log.d(LOG_TAG, "Test");
+                                }
+//                                FragmentHelper.closeFragment(getChildFragmentManager());
+//                                recyclerView.setVisibility(View.VISIBLE);
                             }
+                        });
 
-                            fragmentTransaction.commit();
 
-                        }
+
                     }
 
                     break;

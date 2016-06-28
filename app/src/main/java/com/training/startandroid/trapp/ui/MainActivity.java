@@ -1,13 +1,13 @@
 package com.training.startandroid.trapp.ui;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-import android.app.Fragment;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 
-import android.support.v7.view.ActionMode;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.FragmentManager;
+
 //import android.view.ActionMode;
 
 import android.support.v7.widget.Toolbar;
@@ -23,18 +23,18 @@ import android.support.v7.app.AppCompatActivity;
 
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.RelativeLayout;
 
 import com.training.startandroid.trapp.R;
 import com.training.startandroid.trapp.model.Catalog;
 import com.training.startandroid.trapp.util.FragmentHelper;
-import com.training.startandroid.trapp.util.ImageCache;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private final String LOG_TAG = "class MainActivity";
+
+    private final String[] bundleArgsKey = {"reqHeight", "reqWidth"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,10 +45,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         ActionBar actionBar = getSupportActionBar();
-//        actionBar.setDisplayHomeAsUpEnabled(true);
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setAnimation();
 
         assert fab != null;
         fab.setOnClickListener(new View.OnClickListener() {
@@ -56,7 +53,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
 
-                FragmentManager fragmentManager = getFragmentManager();
+                FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
                 final Fragment currentFragment = FragmentHelper.getHigherFragmentInStack(fragmentManager);
@@ -70,7 +67,12 @@ public class MainActivity extends AppCompatActivity
                     int imageHeight = imageSize[0];
                     int imageWidth = imageSize[1];
 
-                    Fragment addFragment = new AddCatalogFragment(imageHeight, imageWidth);
+
+                    Fragment addFragment = new AddCatalogFragment();
+                    Bundle args = new Bundle();
+                    args.putInt(bundleArgsKey[0], imageHeight);
+                    args.putInt(bundleArgsKey[1], imageWidth);
+                    addFragment.setArguments(args);
 
                     final String currentOperationTag = AddCatalogFragment.class.getName();
 
@@ -98,39 +100,52 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 //        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
+        if (savedInstanceState == null) {
 
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
 
-        CatalogsViewFragment catalogsViewFragment = new CatalogsViewFragment();
-        final String tag = CatalogsViewFragment.class.getName();
-//        transaction.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right);
-        transaction.add(R.id.fragment_parent_layout, catalogsViewFragment, tag);
+            CatalogsViewFragment catalogsViewFragment = new CatalogsViewFragment();
 
-        transaction.addToBackStack(tag);
-        transaction.commit();
+            final String tag = CatalogsViewFragment.class.getName();
+            transaction.add(R.id.fragment_parent_layout, catalogsViewFragment, tag);
 
+            transaction.addToBackStack(tag);
+            transaction.commit();
+        }
     }
 
     @Override
     public void onBackPressed() {
+
+        Log.d(LOG_TAG, "back press");
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
             return;
         }
 
-        FragmentManager fragmentManager = getFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         int countFragments = fragmentManager.getBackStackEntryCount();
 
-        if (countFragments != 1) {
+        Log.d(LOG_TAG, "count back stack: " + countFragments);
+        Fragment fra = FragmentHelper.getHigherFragmentInStack(fragmentManager);
+        Log.d(LOG_TAG, fra.getClass().getName());
+//        super.onBackPressed();
+
+
+        if (countFragments > 1) {
 
             Fragment currentFragment = FragmentHelper.getHigherFragmentInStack(fragmentManager);
-            Fragment previousFragment = FragmentHelper.getPreviousFragmentInBaclStack(fragmentManager);
+            Fragment previousFragment = FragmentHelper.getPreviousFragmentInBackStack(fragmentManager);
 
             FragmentHelper.getBackPreviousFragment(currentFragment, previousFragment, fragmentManager);
 
         } else {
+//            Fragment currentFragment = FragmentHelper.getHigherFragmentInStack(fragmentManager);
+//            int childCount = currentFragment.getChildFragmentManager().getBackStackEntryCount();
+//            Log.d(LOG_TAG, "countChild back stack: "+ childCount);
+
             super.onBackPressed();
         }
 

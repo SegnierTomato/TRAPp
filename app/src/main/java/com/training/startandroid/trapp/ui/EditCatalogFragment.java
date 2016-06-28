@@ -2,9 +2,8 @@ package com.training.startandroid.trapp.ui;
 
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -33,6 +32,8 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
 
     private final String LOG_TAG = EditCatalogFragment.class.getSimpleName();
 
+    private final String[] bundleArgsKey = {"editCatalog", "reqHeight", "reqWidth"};
+
     private Button mButton;
     private ImageView mCatalogImage;
     private EditText mCatalogName;
@@ -47,20 +48,28 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
     private int mImageWidth;
 
     private ImageFetcher mImageFetcher;
+
     private String mImagePath = null;
 
-
-    public EditCatalogFragment(Catalog catalog, int reqHeight, int reqWidth) {
-
-        mEditCatalog = catalog;
-        mImageHeight = reqHeight;
-        mImageWidth = reqWidth;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(LOG_TAG, "onCreate");
+
+        Bundle args = this.getArguments();
+
+        if (args != null) {
+            mEditCatalog = (Catalog) args.getSerializable(bundleArgsKey[0]);
+            mImageHeight = args.getInt(bundleArgsKey[1]);
+            mImageWidth = args.getInt(bundleArgsKey[2]);
+
+            Log.d(LOG_TAG, "Received image height: " + mImageHeight);
+            Log.d(LOG_TAG, "Received image width: " + mImageWidth);
+
+        } else {
+            getActivity().onBackPressed();
+            Log.d(LOG_TAG, "Received bundle args = null");
+        }
     }
 
     @Override
@@ -70,11 +79,6 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
 
         View view = inflater.inflate(R.layout.add_and_edit_catalog, viewGroup, false);
 
-        mCatalogImage = (ImageView) view.findViewById(R.id.add_catalog_image);
-        mCatalogName = (EditText) view.findViewById(R.id.input_catalog_name);
-        mButton = (Button) view.findViewById(R.id.add_edit_catalog_button);
-        mButton.setText("Add");
-        /*
         mCatalogImage = (ImageView) view.findViewById(R.id.add_catalog_image);
         mCatalogName = (EditText) view.findViewById(R.id.input_catalog_name);
 
@@ -98,7 +102,6 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
 
         Drawable removeIcon = null;
 
-
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             removeIcon = getResources().getDrawable(R.drawable.ic_action_remove, null);
         } else {
@@ -113,13 +116,24 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
         percentRelativeLayout.addView(removeImageButton, lp);
 
         removeImageButton.setOnClickListener(this);
-*/
+
         return view;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            mEditCatalog = (Catalog) savedInstanceState.getSerializable(bundleArgsKey[0]);
+            mImageHeight = savedInstanceState.getInt(bundleArgsKey[1]);
+            mImageWidth = savedInstanceState.getInt(bundleArgsKey[2]);
+
+            Log.d(LOG_TAG, "restored image height = " + mImageHeight);
+            Log.d(LOG_TAG, "restored image width = " + mImageWidth);
+
+            mEditCatalogEventListener = (CatalogsViewFragment) getParentFragment();
+        }
 
         Log.d(LOG_TAG, "onActivityCreated");
 //        Activity activity = getActivity();
@@ -132,12 +146,28 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
 
         mImagePath = mEditCatalog.getImagePath();
 
-        mImageFetcher = new ImageFetcher(getFragmentManager());
+        FragmentManager activityFrManager = ((MainActivity) getActivity()).getSupportFragmentManager();
+
+        mImageFetcher = new ImageFetcher(activityFrManager);
 
         if (mImagePath != null) {
             mImageFetcher.loadImage(mCatalogImage, mImageHeight, mImageWidth, mImagePath);
         }
 
+        Log.d(LOG_TAG, "hash Code this fragments: " + this.hashCode());
+        Log.d(LOG_TAG, "hash Code EditListener: " + mEditCatalogEventListener.hashCode());
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState){
+        super.onSaveInstanceState(outState);
+
+        outState.putSerializable(bundleArgsKey[0], mEditCatalog);
+        outState.putInt(bundleArgsKey[1], mImageHeight);
+        outState.putInt(bundleArgsKey[2], mImageWidth);
+
+        mEditCatalogEventListener = null;
     }
 
     @Override
@@ -175,7 +205,7 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
                         mEditCatalog.setImagePath(null);
                     }
 
-                    if (mEditCatalogEventListener !=null) {
+                    if (mEditCatalogEventListener != null) {
                         mEditCatalogEventListener.editCatalog(mEditCatalog);
                     }
 
@@ -189,6 +219,7 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
 
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType("image/*");
+
                 startActivityForResult(intent, SELECT_PHOTO);
                 break;
 
@@ -203,16 +234,22 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
                     defaultImage = getResources().getDrawable(R.drawable.ic_action_new_picture);
                 }
 
-                mCatalogImage.setBackground(defaultImage);
+                mCatalogImage.setImageDrawable(defaultImage);
+                mCatalogImage.invalidate();
                 break;
         }
 
     }
 
     @Override
+    public void startActivityForResult(Intent intent, int requestCode) {
+        super.startActivityForResult(intent, requestCode);
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        Log.d("Result Activity", "On");
+        Log.d(LOG_TAG, "onActivityResult");
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == SELECT_PHOTO) {
                 Uri selectedImageUri = data.getData();
@@ -256,10 +293,6 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
         }
     }
 
-    public void setEditCatalogEventListener(EditCatalogEventListener listener) {
-        mEditCatalogEventListener = listener;
-    }
-
     public boolean validateName() {
         if (mCatalogName.getText().toString().trim().isEmpty()) {
             mInputLayoutCatalogName.setError("Enter catalog name");
@@ -271,7 +304,14 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
         return true;
     }
 
+
+    public void setEditCatalogEventListener(EditCatalogEventListener listener) {
+        mEditCatalogEventListener = listener;
+    }
+
     public interface EditCatalogEventListener {
         public void editCatalog(Catalog editCatalog);
     }
+
+
 }

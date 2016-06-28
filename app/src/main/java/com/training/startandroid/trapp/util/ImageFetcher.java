@@ -1,7 +1,7 @@
 package com.training.startandroid.trapp.util;
 
 
-import android.app.FragmentManager;
+import android.support.v4.app.FragmentManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -11,12 +11,7 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-
-import com.training.startandroid.trapp.R;
-import com.training.startandroid.trapp.ui.SelectableRecyclerViewAdapter;
-
 import java.lang.ref.WeakReference;
-import java.util.zip.Inflater;
 
 public class ImageFetcher {
 

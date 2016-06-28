@@ -2,9 +2,7 @@ package com.training.startandroid.trapp.ui;
 
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -30,6 +28,8 @@ public class AddCatalogFragment extends Fragment
 
     private final String LOG_TAG = AddCatalogFragment.class.getSimpleName();
 
+    private final String[] bundleArgsKey = {"reqHeight", "reqWidth"};
+
     private EditText mInputCatalogName;
     private ImageView mCatalogImage;
     private Button mAddButton;
@@ -40,29 +40,27 @@ public class AddCatalogFragment extends Fragment
     private ImageFetcher mImageFetcher;
 
     private AddCatalogEventListener mAddCatalogEventListener;
-    private String mImagePath = null;
 
+    private String mImagePath = null;
     private int mImageHeight;
     private int mImageWidth;
 
-    public AddCatalogFragment(int reqHeight, int reqWidth) {
 
-        mImageHeight = reqHeight;
-        mImageWidth = reqWidth;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
-
-    public void setAddCatalogEventListener(AddCatalogEventListener listener) {
-        mAddCatalogEventListener = listener;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle args = this.getArguments();
+
+        if (args != null) {
+            mImageHeight = args.getInt(bundleArgsKey[0]);
+            mImageWidth = args.getInt(bundleArgsKey[1]);
+
+        } else {
+            getActivity().onBackPressed();
+            Log.d(LOG_TAG, "Received bundle args = null");
+        }
     }
 
     @Override
@@ -91,11 +89,35 @@ public class AddCatalogFragment extends Fragment
 
         mImageFetcher = new ImageFetcher(getFragmentManager());
 
+        if (savedInstanceState != null) {
+            mImageWidth = savedInstanceState.getInt(bundleArgsKey[0]);
+            mImageWidth = savedInstanceState.getInt(bundleArgsKey[1]);
+
+            mAddCatalogEventListener = (CatalogsViewFragment) getFragmentManager().findFragmentByTag(CatalogsViewFragment.class.getName());
+        }
+
+        Log.d(LOG_TAG, "hash Code this fragments: " + this.hashCode());
+        Log.d(LOG_TAG, "hash Code Listener Fragment: " + mAddCatalogEventListener.hashCode());
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(bundleArgsKey[0], mImageHeight);
+        outState.putInt(bundleArgsKey[1], mImageWidth);
+
+        mAddCatalogEventListener = null;
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     @Override
     public void onPause() {
-        Log.d(LOG_TAG, "onPause");
         mImageFetcher.setPauseBackgroundLoadingTask(true);
         super.onPause();
     }
@@ -226,6 +248,10 @@ public class AddCatalogFragment extends Fragment
 //        public void onTextChanged(CharSequence s, int start, int before, int count) {
 //        }
 //    }
+
+    public void setAddCatalogEventListener(AddCatalogEventListener listener) {
+        mAddCatalogEventListener = listener;
+    }
 
     public interface AddCatalogEventListener {
         public void addNewCatalog(String catalogName, String imagePath);

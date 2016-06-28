@@ -8,10 +8,12 @@ package com.training.startandroid.trapp.util;
 *   for this created fragment.
 */
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
+
+import java.lang.reflect.Method;
 
 public class FragmentHelper {
 
@@ -45,25 +47,65 @@ public class FragmentHelper {
         }
     }
 
-
     public static Fragment getHigherFragmentInStack(FragmentManager fragmentManager) {
 
+        Fragment currentHigherFragment = null;
         int countFragment = fragmentManager.getBackStackEntryCount();
 
-        final String tag = fragmentManager.getBackStackEntryAt(countFragment - 1).getName();
-        final Fragment currentFragment = fragmentManager.findFragmentByTag(tag);
+        if (countFragment > 0) {
+            final String tag = fragmentManager.getBackStackEntryAt(countFragment - 1).getName();
+            currentHigherFragment = fragmentManager.findFragmentByTag(tag);
 
-        return currentFragment;
+            Fragment childFragment = getHigherFragmentInStack(currentHigherFragment.getChildFragmentManager());
+
+            if (childFragment != null) {
+                currentHigherFragment = childFragment;
+            }
+
+        }
+
+        return currentHigherFragment;
     }
 
-    public static Fragment getPreviousFragmentInBaclStack(FragmentManager fragmentManager) {
+    public static Fragment getPreviousFragmentInBackStack(FragmentManager fragmentManager) {
 
-        int countFragments = fragmentManager.getBackStackEntryCount();
+        Fragment higherFragment = getHigherFragmentInStack(fragmentManager);
 
-        final String tagPrevious = fragmentManager.getBackStackEntryAt(countFragments - 2).getName();
-        Fragment previousFragment = fragmentManager.findFragmentByTag(tagPrevious);
+        if (higherFragment != null) {
+            FragmentManager fragmentMangerInHigherLevel = higherFragment.getFragmentManager();
 
-        return previousFragment;
+            int countFragmentsInLevel = fragmentMangerInHigherLevel.getBackStackEntryCount();
+
+            if (countFragmentsInLevel > 1) {
+
+                final String tagPrevious = fragmentManager.getBackStackEntryAt(countFragmentsInLevel - 2).getName();
+                return fragmentManager.findFragmentByTag(tagPrevious);
+            } else {
+
+                return higherFragment.getParentFragment();
+            }
+
+        }
+
+        return null;
+//        Fragment previousFragment = null;
+//        int countFragments = fragmentManager.getBackStackEntryCount();
+//
+//        if (countFragments > 1) {
+//
+//            final String tagHigherFragment = fragmentManager.getBackStackEntryAt(countFragments - 1).getName();
+//            Fragment higherFragment = fragmentManager.findFragmentByTag(tagHigherFragment);
+//
+//            Fragment childPreviousFragment = getPreviousFragmentInBackStack(higherFragment.getChildFragmentManager());
+//
+//            if (childPreviousFragment != null) {
+//                higherFragment = childPreviousFragment;
+//            }
+//
+//            final String tagPrevious = fragmentManager.getBackStackEntryAt(countFragments - 2).getName();
+//            previousFragment = fragmentManager.findFragmentByTag(tagPrevious);
+//        }
+//        return previousFragment;
     }
 
     public static void getBackPreviousFragment(Fragment currentFragment, Fragment previousFragment, FragmentManager fragmentManager) {
@@ -72,23 +114,32 @@ public class FragmentHelper {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
             if (currentFragment != null) {
-//            fragmentTransaction.hide(currentFragment);
+                Fragment parentFragment = currentFragment.getParentFragment();
                 fragmentTransaction.remove(currentFragment);
+
+                if (previousFragment != null) {
+
+                    if (parentFragment != null) {
+                        if (parentFragment == previousFragment) {
+
+//                          Using reflection in Java for invoking method setVisible(boolean)
+
+                            Method methodSetVisibleView = parentFragment.getClass().getMethod("setVisible", new Class[]{boolean.class});
+                            methodSetVisibleView.invoke(parentFragment, true);
+
+//                            parentFragment.setVisible(true);
+
+                        }
+                    } else {
+                        fragmentTransaction.show(previousFragment);
+                    }
+                }
+
             }
 
-            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
-
-            if (previousFragment != null) {
-                fragmentTransaction.show(previousFragment);
-            }
-
-//            int count = fragmentManager.getBackStackEntryCount();
+            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             fragmentManager.popBackStackImmediate();
-//            count = fragmentManager.getBackStackEntryCount();
-
-//            fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
-
 
         } catch (Exception ex) {
             Log.e(LOG_TAG, ex.toString());
@@ -104,4 +155,6 @@ public class FragmentHelper {
         fragmentTransaction.commit();
 
     }
+
+
 }

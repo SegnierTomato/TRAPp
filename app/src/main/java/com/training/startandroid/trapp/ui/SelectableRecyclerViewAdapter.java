@@ -1,6 +1,5 @@
 package com.training.startandroid.trapp.ui;
 
-import android.support.design.widget.TabLayout;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
