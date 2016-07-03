@@ -151,8 +151,9 @@ public final class Constants {
             "END;";
 
     public static final String DB_SQLITE_NAME = "dictionary.db";
-    public static int DB_VERSION = 1;
+    public static final int DB_VERSION = 1;
 
+    public static final String MESSAGE_ERROR_RUN_FRAGMENT= "Can't run selected action. Please try again.";
 
     public enum ActionStatement {
         INSERT_NEW_CATALOG,

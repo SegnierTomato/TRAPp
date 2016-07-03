@@ -23,9 +23,11 @@ import android.support.v7.app.AppCompatActivity;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.training.startandroid.trapp.R;
 import com.training.startandroid.trapp.model.Catalog;
+import com.training.startandroid.trapp.util.Constants;
 import com.training.startandroid.trapp.util.FragmentHelper;
 
 
@@ -67,7 +69,6 @@ public class MainActivity extends AppCompatActivity
                     int imageHeight = imageSize[0];
                     int imageWidth = imageSize[1];
 
-
                     Fragment addFragment = new AddCatalogFragment();
                     Bundle args = new Bundle();
                     args.putInt(bundleArgsKey[0], imageHeight);
@@ -79,10 +80,17 @@ public class MainActivity extends AppCompatActivity
                     fragmentTransaction.add(R.id.fragment_parent_layout, addFragment, currentOperationTag);
 
                     fragmentTransaction.addToBackStack(currentOperationTag);
-                    fragmentTransaction.commit();
+                    int result = fragmentTransaction.commit();
 
-                    AddCatalogFragment addCatalogFragment = (AddCatalogFragment) addFragment;
-                    addCatalogFragment.setAddCatalogEventListener(catalogViewFragment);
+                    if (result >= 0) {
+//                        catalogViewFragment.setFlagHasChildrenFragments(true);
+
+                        AddCatalogFragment addCatalogFragment = (AddCatalogFragment) addFragment;
+                        addCatalogFragment.setAddCatalogEventListener(catalogViewFragment);
+                    } else {
+                        Toast.makeText(getApplicationContext(), Constants.MESSAGE_ERROR_RUN_FRAGMENT, Toast.LENGTH_SHORT).show();
+                    }
+
                 }
 
             }
@@ -126,30 +134,29 @@ public class MainActivity extends AppCompatActivity
         }
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        int countFragments = fragmentManager.getBackStackEntryCount();
+        int countFragmentsInParentLevel = fragmentManager.getBackStackEntryCount();
 
-        Log.d(LOG_TAG, "count back stack: " + countFragments);
-        Fragment fra = FragmentHelper.getHigherFragmentInStack(fragmentManager);
-        Log.d(LOG_TAG, fra.getClass().getName());
-//        super.onBackPressed();
+        Fragment higherFragmentInParentLevel = null;
 
+        if (countFragmentsInParentLevel == 1) {
+            String higherFragmentTagInLevel = fragmentManager.getBackStackEntryAt(0).getName();
+            higherFragmentInParentLevel = fragmentManager.findFragmentByTag(higherFragmentTagInLevel);
+        }
 
-        if (countFragments > 1) {
+        Fragment higherFragmentInActivity = FragmentHelper.getHigherFragmentInStack(fragmentManager);
 
-            Fragment currentFragment = FragmentHelper.getHigherFragmentInStack(fragmentManager);
+        if (countFragmentsInParentLevel > 1 || higherFragmentInActivity != higherFragmentInParentLevel) {
+
             Fragment previousFragment = FragmentHelper.getPreviousFragmentInBackStack(fragmentManager);
-
-            FragmentHelper.getBackPreviousFragment(currentFragment, previousFragment, fragmentManager);
+            FragmentHelper.getBackPreviousFragment(higherFragmentInActivity, previousFragment, fragmentManager);
 
         } else {
-//            Fragment currentFragment = FragmentHelper.getHigherFragmentInStack(fragmentManager);
-//            int childCount = currentFragment.getChildFragmentManager().getBackStackEntryCount();
-//            Log.d(LOG_TAG, "countChild back stack: "+ childCount);
-
             super.onBackPressed();
+            finish();
         }
 
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

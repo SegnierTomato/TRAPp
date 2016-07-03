@@ -18,8 +18,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
-import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.training.startandroid.trapp.R;
@@ -29,7 +27,6 @@ import com.training.startandroid.trapp.model.Catalog;
 import com.training.startandroid.trapp.ui.selection.SelectionHelper;
 import com.training.startandroid.trapp.ui.selection.SelectionObserver;
 import com.training.startandroid.trapp.util.Constants;
-import com.training.startandroid.trapp.util.FragmentHelper;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -37,11 +34,12 @@ import java.util.Iterator;
 import java.util.List;
 
 public class CatalogsViewFragment extends Fragment
-        implements AddCatalogFragment.AddCatalogEventListener, EditCatalogFragment.EditCatalogEventListener {
+        implements AddCatalogFragment.AddCatalogEventListener, EditCatalogFragment.EditCatalogEventListener, FragmentManager.OnBackStackChangedListener {
 
     private final String LOG_TAG = CatalogsViewFragment.class.getSimpleName();
 
-    private final String []bundleArgsKeysForEditCatalogs = {"editCatalog", "reqHeight", "reqWidth"};
+    private final String[] bundleArgsKeysForEditCatalogs = {"editCatalog", "reqHeight", "reqWidth"};
+    private final String bundleArgKey = "isHasChildrenFragments";
 
     private final ActionModeCallback mActionModeCallback = new ActionModeCallback();
     private SelectableRecyclerViewAdapter mAdapter;
@@ -52,6 +50,8 @@ public class CatalogsViewFragment extends Fragment
     private int mImageWidth;
 
     private RecyclerView recyclerView;
+
+    private boolean isHasChildrenFragments = false;
 
     private static boolean isTablet(Context context) {
 
@@ -93,6 +93,8 @@ public class CatalogsViewFragment extends Fragment
 
         super.onActivityCreated(savedInstanceState);
 
+        Log.d(LOG_TAG, "onActivityCreated");
+
         Activity activity = getActivity();
         mContext = activity.getApplicationContext();
 
@@ -102,7 +104,7 @@ public class CatalogsViewFragment extends Fragment
 
         mAdapter = new SelectableRecyclerViewAdapter(this, listCatalogs);
 
-        RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.recycler_view);
+        final RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(getDisplayColumns(mContext), StaggeredGridLayoutManager.VERTICAL));
 
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
@@ -114,12 +116,77 @@ public class CatalogsViewFragment extends Fragment
         mImageWidth = imageSize[1];
 
         Log.d("AddCatalogFragment", "hash Code CatalogsViewFragment fragments: " + this.hashCode());
+
+        if (savedInstanceState != null) {
+            isHasChildrenFragments = savedInstanceState.getBoolean(bundleArgKey);
+
+            if (isHasChildrenFragments) {
+                setVisible(false);
+            } else {
+                setVisible(true);
+            }
+        }
+
+        final FragmentManager fragmentManager = getChildFragmentManager();
+        fragmentManager.addOnBackStackChangedListener(this);
+
+    }
+
+    @Override
+    public void onBackStackChanged() {
+
+        Log.d(LOG_TAG, "onBackStackChanged");
+
+        FragmentManager fragmentManager = getChildFragmentManager();
+        if (fragmentManager.getBackStackEntryCount() > 0) {
+            setVisible(false);
+            isHasChildrenFragments = true;
+        } else {
+            setVisible(true);
+            isHasChildrenFragments = false;
+        }
+
+    }
+
+//        OrientationEventListener orientationEventListener = new OrientationEventListener(getContext(), SensorManager.SENSOR_DELAY_NORMAL) {
+//            @Override
+//            public void onOrientationChanged(int orientation) {
+////                recyclerView.VISIBLE(View.GONE);
+//                Log.d(LOG_TAG, "orientation changed");
+//            }
+//        };
+//
+//        orientationEventListener.enable();
+
+
+//    @Override
+//    public void onConfigurationChanged(Configuration newConfig) {
+//        super.onConfigurationChanged(newConfig);
+//
+//        Log.d(LOG_TAG, "onConfigurationChanged");
+//
+//        switch(newConfig.orientation){
+//            case Configuration.ORIENTATION_PORTRAIT:
+//                break;
+//
+//            case Configuration.ORIENTATION_LANDSCAPE:
+//                break;
+//        }
+//    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putBoolean(bundleArgKey, isHasChildrenFragments);
     }
 
     @Override
     public void onPause() {
         DatabaseConnection.closeConnection();
+        getChildFragmentManager().removeOnBackStackChangedListener(this);
         super.onPause();
+
     }
 
     @Override
@@ -161,14 +228,23 @@ public class CatalogsViewFragment extends Fragment
 
     public void setVisible(boolean visible) {
 
+        Log.d(LOG_TAG, "setVisible");
+
         if (visible) {
             recyclerView.setVisibility(View.VISIBLE);
         } else {
             recyclerView.setVisibility(View.GONE);
         }
+
+
     }
 
-     public ActionMode getActionMode() {
+    public void setFlagHasChildrenFragments(boolean flag) {
+        isHasChildrenFragments = flag;
+    }
+
+
+    public ActionMode getActionMode() {
         return mActionMode;
     }
 
@@ -231,7 +307,6 @@ public class CatalogsViewFragment extends Fragment
 
                         final String currentOperationTag = EditCatalogFragment.class.getName();
 
-                        recyclerView.setVisibility(View.GONE);
                         mActionMode.finish();
 
                         FragmentManager fragmentManager = getChildFragmentManager();
@@ -249,24 +324,16 @@ public class CatalogsViewFragment extends Fragment
                         fragmentTransaction.add(R.id.parent_for_children_fragments, editCatalogFragment, currentOperationTag);
 
                         fragmentTransaction.addToBackStack(currentOperationTag);
-                        fragmentTransaction.commit();
+                        int result = fragmentTransaction.commit();
+
+                        if (result >= 0) {
+                            CatalogsViewFragment.this.setVisible(false);
+                            isHasChildrenFragments = true;
+                        } else {
+                            Toast.makeText(getContext(), Constants.MESSAGE_ERROR_RUN_FRAGMENT, Toast.LENGTH_SHORT).show();
+                        }
 
                         editCatalogFragment.setEditCatalogEventListener(CatalogsViewFragment.this);
-
-                        fragmentManager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-
-                            @Override
-                            public void onBackStackChanged() {
-                                Log.d(LOG_TAG, "Back Press");
-
-                                if (getChildFragmentManager().getBackStackEntryCount() == 0) {
-                                    Log.d(LOG_TAG, "Test");
-                                }
-//                                FragmentHelper.closeFragment(getChildFragmentManager());
-//                                recyclerView.setVisibility(View.VISIBLE);
-                            }
-                        });
-
 
 
                     }

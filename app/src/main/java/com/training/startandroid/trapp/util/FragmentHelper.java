@@ -13,7 +13,10 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
+import com.training.startandroid.trapp.ui.CatalogsViewFragment;
+
 import java.lang.reflect.Method;
+import java.util.List;
 
 public class FragmentHelper {
 
@@ -119,17 +122,13 @@ public class FragmentHelper {
 
                 if (previousFragment != null) {
 
-                    if (parentFragment != null) {
-                        if (parentFragment == previousFragment) {
+                    if (parentFragment != null && parentFragment == previousFragment) {
 
 //                          Using reflection in Java for invoking method setVisible(boolean)
 
-                            Method methodSetVisibleView = parentFragment.getClass().getMethod("setVisible", new Class[]{boolean.class});
-                            methodSetVisibleView.invoke(parentFragment, true);
+                        Method methodSetVisibleView = parentFragment.getClass().getMethod("setVisible", new Class[]{boolean.class});
+                        methodSetVisibleView.invoke(parentFragment, true);
 
-//                            parentFragment.setVisible(true);
-
-                        }
                     } else {
                         fragmentTransaction.show(previousFragment);
                     }
@@ -137,11 +136,19 @@ public class FragmentHelper {
 
             }
 
-            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+//            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+
             fragmentManager.popBackStackImmediate();
             fragmentTransaction.commit();
 
+            Log.d("CatalogsView", "Done");
+
+
+            int testCount = fragmentManager.getBackStackEntryCount();
+            List<Fragment> listFragments = fragmentManager.getFragments();
+
         } catch (Exception ex) {
+            Log.e("CatalogsViewFragment", ex.toString());
             Log.e(LOG_TAG, ex.toString());
         }
 

@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +25,7 @@ import com.training.startandroid.trapp.util.FragmentHelper;
 import com.training.startandroid.trapp.util.ImageFetcher;
 
 public class AddCatalogFragment extends Fragment
-        implements View.OnClickListener, View.OnFocusChangeListener {
+        implements View.OnClickListener, View.OnFocusChangeListener, FragmentManager.OnBackStackChangedListener {
 
     private final String LOG_TAG = AddCatalogFragment.class.getSimpleName();
 
@@ -98,6 +99,9 @@ public class AddCatalogFragment extends Fragment
 
         Log.d(LOG_TAG, "hash Code this fragments: " + this.hashCode());
         Log.d(LOG_TAG, "hash Code Listener Fragment: " + mAddCatalogEventListener.hashCode());
+
+
+//        ((CatalogsViewFragment)getParentFragment()).setVisible(false);
     }
 
     @Override
@@ -110,6 +114,18 @@ public class AddCatalogFragment extends Fragment
         mAddCatalogEventListener = null;
     }
 
+    @Override
+    public void onBackStackChanged() {
+
+        Log.d(LOG_TAG, "onBackStackChanged");
+
+        FragmentManager fragmentManager = getChildFragmentManager();
+        if (fragmentManager.getBackStackEntryCount() > 0) {
+
+        } else {
+        }
+
+    }
 
     @Override
     public void onResume() {
@@ -126,6 +142,7 @@ public class AddCatalogFragment extends Fragment
     public void onDestroy() {
         Log.d(LOG_TAG, "onDestroy");
         mImageFetcher.setExitTasksEarly(true);
+
         super.onDestroy();
     }
 

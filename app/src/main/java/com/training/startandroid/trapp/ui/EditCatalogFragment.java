@@ -177,6 +177,13 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
     }
 
     @Override
+    public void onDestroy(){
+        ((CatalogsViewFragment) getParentFragment()).setVisible(true);
+        super.onDestroy();
+
+    }
+
+    @Override
     public void onResume() {
         DatabaseConnection.openConnection();
         super.onResume();
@@ -241,12 +248,7 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
 
     }
 
-    @Override
-    public void startActivityForResult(Intent intent, int requestCode) {
-        super.startActivityForResult(intent, requestCode);
-    }
-
-    @Override
+      @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         Log.d(LOG_TAG, "onActivityResult");
