@@ -1,6 +1,8 @@
 package com.training.startandroid.trapp.util;
 
 
+import java.io.Serializable;
+
 public final class Constants {
 
     private Constants(){
@@ -210,7 +212,8 @@ public final class Constants {
         CAN_NOT_UPDATE_IMAGE_AND_SOUND
     }
 
-    public enum SpecificDictionary{
+    public enum SpecificDictionary implements Serializable{
+        ALL,
         GOOGLE_DICTIONARY,
         YANDEX_DICTIONARY,
         CUSTOM_DICTIONARY

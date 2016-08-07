@@ -19,9 +19,9 @@
             android:orientation="vertical">
 
             <android.support.percent.PercentRelativeLayout
+                android:id="@+id/add_catalog_image_parent_layout"
                 android:layout_width="match_parent"
-                android:layout_height="170dp"
-                android:id="@+id/add_catalog_image_parent_layout">
+                android:layout_height="170dp">
 
 
                 <ImageView
@@ -55,23 +55,30 @@
                     android:id="@+id/input_catalog_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:ellipsize="end"
                     android:hint="Catalog name"
                     android:lines="1"
-
                     android:singleLine="true" />
 
             </android.support.design.widget.TextInputLayout>
 
-            <Button
-                android:id="@+id/add_edit_catalog_button"
+            <android.support.percent.PercentRelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingLeft="8dp"
-                android:paddingTop="8dp"
-                android:textAlignment="center"
-                android:textColor="@color/colorAccent" />
+                android:layout_height="@dimen/button_container_height"
+                android:layout_marginTop="@dimen/button_top_container_margin">
 
+                <Button
+                    android:id="@+id/add_edit_catalog_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:minWidth="88dp"
+                    android:textAlignment="center"
+                    android:textColor="@color/White"
+                    android:theme="@style/AppTheme.Button"
+                    app:layout_widthPercent="50%" />
+            </android.support.percent.PercentRelativeLayout>
 
         </LinearLayout>
     </ScrollView>

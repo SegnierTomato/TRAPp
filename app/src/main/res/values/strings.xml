@@ -13,4 +13,7 @@
     <string name="action_unselected_all">Unselected All</string>
 
     <string name="action_setting">Setting</string>
+
+    <string name="button_add_text">Add</string>
+    <string name="button_edit_text">Edit</string>
 </resources>

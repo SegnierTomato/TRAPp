@@ -1,5 +1,6 @@
-package com.training.startandroid.trapp.ui;
+package com.training.startandroid.trapp.ui.fragments.catalogs;
 
+import android.support.annotation.NonNull;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -28,10 +29,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
-public class SelectableRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+public class SelectableRecyclerViewAdapterForCatalogs extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         implements HolderClickObserver, SelectionObserver {
 
-    private final String LOG_TAG = SelectableRecyclerViewAdapter.class.getSimpleName();
+    private final String LOG_TAG = SelectableRecyclerViewAdapterForCatalogs.class.getSimpleName();
 
     private List<Catalog> mListCatalogs;
     private SelectionHelper mSelectionHelper;
@@ -40,7 +41,7 @@ public class SelectableRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
     private int mImageHeight = -1;
     private int mImageWidth = -1;
 
-    public SelectableRecyclerViewAdapter(CatalogsViewFragment fragment, List<Catalog> listCatalogs) {
+    public SelectableRecyclerViewAdapterForCatalogs(@NonNull CatalogsViewFragment fragment, List<Catalog> listCatalogs) {
 
         mFragment = fragment;
 
@@ -98,7 +99,18 @@ public class SelectableRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
 
     public void editItem(Catalog editItem) {
 //        mListCatalogs.add();
+        Iterator<Catalog> iterator = mListCatalogs.iterator();
+
+        int count = 0;
+        while (iterator.hasNext()) {
+            count++;
+            Catalog temp = iterator.next();
+            if (temp.getId() == editItem.getId()) {
+                Log.d(LOG_TAG, "count" + count);
+                break;
+            }
 //        notifyItemChanged(position);
+        }
     }
 
     public void removeSelectedItems() {
@@ -139,6 +151,9 @@ public class SelectableRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
             return null;
         }
     }
+
+    /* Methods onHolderClick and LongClick now not using
+    * */
 
     @Override
     public void onHolderClick(RecyclerView.ViewHolder viewHolder) {
@@ -200,9 +215,10 @@ public class SelectableRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
             catalogCountWords = (TextView) itemView.findViewById(R.id.catalog_count_words);
             catalogCreatedDate = (TextView) itemView.findViewById(R.id.catalog_created_date);
 
-            showButton = (Button) itemView.findViewById(R.id.catalog_open_button);
-            expandButton = (Button) itemView.findViewById(R.id.catalog_expandable_button);
+            showButton = (Button) itemView.findViewById(R.id.card_open_action_button);
+            expandButton = (Button) itemView.findViewById(R.id.card_expandable_action_button);
 
+//            itemView.setOnClickListener(this);
         }
 
         public void bindInfo(Catalog catalog) {
@@ -213,7 +229,7 @@ public class SelectableRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
 
             if (imagePath != null) {
 
-                if (mImageHeight == -1 && mImageWidth == -1) {
+                if (mImageHeight == -1 || mImageWidth == -1) {
                     ViewTreeObserver viewTreeObserver = catalogImage.getViewTreeObserver();
                     viewTreeObserver.addOnPreDrawListener(new CatalogHolderOnPreDrawListener(imagePath));
                 } else {

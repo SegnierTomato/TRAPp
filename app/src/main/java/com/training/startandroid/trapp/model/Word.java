@@ -1,10 +1,11 @@
 package com.training.startandroid.trapp.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 
-public class Word {
+public class Word implements Serializable{
 
     private int id;
     private String word;

@@ -1,4 +1,4 @@
-package com.training.startandroid.trapp.ui;
+package com.training.startandroid.trapp.ui.fragments.catalogs;
 
 
 import android.app.Activity;
@@ -25,10 +25,13 @@ import android.widget.ImageView;
 import com.training.startandroid.trapp.R;
 import com.training.startandroid.trapp.database.DatabaseConnection;
 import com.training.startandroid.trapp.model.Catalog;
+import com.training.startandroid.trapp.ui.MainActivity;
+import com.training.startandroid.trapp.ui.fragments.NestedFragmentIteraction;
 import com.training.startandroid.trapp.util.FragmentHelper;
 import com.training.startandroid.trapp.util.ImageFetcher;
 
-public class EditCatalogFragment extends Fragment implements View.OnClickListener, View.OnFocusChangeListener {
+public class EditCatalogFragment extends Fragment
+        implements View.OnClickListener, View.OnFocusChangeListener, NestedFragmentIteraction {
 
     private final String LOG_TAG = EditCatalogFragment.class.getSimpleName();
 
@@ -83,7 +86,7 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
         mCatalogName = (EditText) view.findViewById(R.id.input_catalog_name);
 
         mButton = (Button) view.findViewById(R.id.add_edit_catalog_button);
-        mButton.setText("Edit");
+        mButton.setText(R.string.button_edit_text);
 
         mInputLayoutCatalogName = (TextInputLayout) view.findViewById(R.id.input_layout_catalog_name);
 
@@ -135,6 +138,7 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
             mEditCatalogEventListener = (CatalogsViewFragment) getParentFragment();
         }
 
+
         Log.d(LOG_TAG, "onActivityCreated");
 //        Activity activity = getActivity();
 
@@ -143,16 +147,16 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
         mCatalogName.setOnFocusChangeListener(this);
 
         mCatalogName.setText(mEditCatalog.getName());
-
         mImagePath = mEditCatalog.getImagePath();
 
         FragmentManager activityFrManager = ((MainActivity) getActivity()).getSupportFragmentManager();
-
         mImageFetcher = new ImageFetcher(activityFrManager);
 
         if (mImagePath != null) {
             mImageFetcher.loadImage(mCatalogImage, mImageHeight, mImageWidth, mImagePath);
         }
+
+        notifyParent2ChildState(true);
 
         Log.d(LOG_TAG, "hash Code this fragments: " + this.hashCode());
         Log.d(LOG_TAG, "hash Code EditListener: " + mEditCatalogEventListener.hashCode());
@@ -160,8 +164,11 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState){
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+
+        mEditCatalog.setName(mCatalogName.getText().toString());
+        mEditCatalog.setImagePath(mImagePath);
 
         outState.putSerializable(bundleArgsKey[0], mEditCatalog);
         outState.putInt(bundleArgsKey[1], mImageHeight);
@@ -171,14 +178,21 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
     }
 
     @Override
+    public void notifyParent2ChildState(boolean isAlive) {
+        ((CatalogsViewFragment)  getParentFragment()).setVisible(!isAlive);
+    }
+
+
+    @Override
     public void onPause() {
         DatabaseConnection.closeConnection();
+        notifyParent2ChildState(false);
         super.onPause();
     }
 
     @Override
-    public void onDestroy(){
-        ((CatalogsViewFragment) getParentFragment()).setVisible(true);
+    public void onDestroy() {
+//        ((CatalogsViewFragment) getParentFragment()).setVisible(true);
         super.onDestroy();
 
     }
@@ -248,7 +262,7 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
 
     }
 
-      @Override
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         Log.d(LOG_TAG, "onActivityResult");
@@ -310,6 +324,8 @@ public class EditCatalogFragment extends Fragment implements View.OnClickListene
     public void setEditCatalogEventListener(EditCatalogEventListener listener) {
         mEditCatalogEventListener = listener;
     }
+
+
 
     public interface EditCatalogEventListener {
         public void editCatalog(Catalog editCatalog);

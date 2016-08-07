@@ -5,30 +5,30 @@
     android:orientation="horizontal">
 
     <Button
-        android:id="@+id/catalog_open_button"
+        android:id="@+id/card_open_action_button"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:gravity="left|center_vertical"
         android:paddingBottom="8dp"
         android:paddingLeft="8dp"
         android:paddingTop="8dp"
-        android:background="@android:color/transparent"
-        android:gravity="left|center_vertical"
         android:text="Show"
         android:textAlignment="center"
         android:textColor="@color/colorAccent" />
 
 
     <Button
-        android:id="@+id/catalog_expandable_button"
+        android:id="@+id/card_expandable_action_button"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentRight="true"
+        android:background="@android:color/transparent"
+        android:gravity="right|center_vertical"
         android:paddingBottom="8dp"
         android:paddingRight="8dp"
         android:paddingTop="8dp"
-        android:background="@android:color/transparent"
-        android:gravity="right|center_vertical"
-        android:text="Expand Card"
+        android:text="Expand"
         android:textAlignment="center"
         android:textColor="@color/colorAccent" />
 

@@ -1,17 +1,20 @@
-package com.training.startandroid.trapp.ui;
+package com.training.startandroid.trapp.ui.fragments.catalogs;
 
 
 import android.app.Activity;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentManager;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,9 +27,14 @@ import com.training.startandroid.trapp.R;
 import com.training.startandroid.trapp.database.DatabaseConnection;
 import com.training.startandroid.trapp.database.dao.DAOFactory;
 import com.training.startandroid.trapp.model.Catalog;
+import com.training.startandroid.trapp.ui.MainActivity;
+import com.training.startandroid.trapp.ui.selection.HolderClickObserver;
 import com.training.startandroid.trapp.ui.selection.SelectionHelper;
 import com.training.startandroid.trapp.ui.selection.SelectionObserver;
+import com.training.startandroid.trapp.ui.fragments.words.WordsViewFragment;
 import com.training.startandroid.trapp.util.Constants;
+import com.training.startandroid.trapp.util.FragmentHelper;
+import com.training.startandroid.trapp.util.RecyclerViewConfiguration;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -34,43 +42,26 @@ import java.util.Iterator;
 import java.util.List;
 
 public class CatalogsViewFragment extends Fragment
-        implements AddCatalogFragment.AddCatalogEventListener, EditCatalogFragment.EditCatalogEventListener, FragmentManager.OnBackStackChangedListener {
+        implements AddCatalogFragment.AddCatalogEventListener, EditCatalogFragment.EditCatalogEventListener, HolderClickObserver {
 
     private final String LOG_TAG = CatalogsViewFragment.class.getSimpleName();
 
-    private final String[] bundleArgsKeysForEditCatalogs = {"editCatalog", "reqHeight", "reqWidth"};
+    private final String[] bundleArgsKeysImageSize = {"reqHeight", "reqWidth"};
+
+    private final String bundleArgsKeyForEditCatalogObject = "editCatalog";
+    private final String bundleArgsKeyForWordsView = "openedCatalog";
     private final String bundleArgKey = "isHasChildrenFragments";
 
     private final ActionModeCallback mActionModeCallback = new ActionModeCallback();
-    private SelectableRecyclerViewAdapter mAdapter;
+    private SelectableRecyclerViewAdapterForCatalogs mAdapter;
     private ActionMode mActionMode;
     private Context mContext;
 
     private int mImageHeight;
     private int mImageWidth;
 
-    private RecyclerView recyclerView;
-
-    private boolean isHasChildrenFragments = false;
-
-    private static boolean isTablet(Context context) {
-
-        boolean xlarge = ((context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == 4);
-        boolean large = ((context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) ==
-                Configuration.SCREENLAYOUT_SIZE_LARGE);
-
-        return (xlarge || large);
-    }
-
-    private static int getDisplayColumns(Context context) {
-
-        int columnCount = 1;
-        if (isTablet(context)) {
-            columnCount = 2;
-        }
-
-        return columnCount;
-    }
+    private RecyclerView mRecyclerView;
+    private FloatingActionButton mFab;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,9 +72,9 @@ public class CatalogsViewFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         Log.d(LOG_TAG, "onCreateView");
-        View view = inflater.inflate(R.layout.recycler_view, container, false);
-
-        recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        View view = inflater.inflate(R.layout.recycler_view_container, container, false);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+        mFab = (FloatingActionButton) view.findViewById(R.id.fab);
 
         return view;
     }
@@ -102,102 +93,63 @@ public class CatalogsViewFragment extends Fragment
         DatabaseConnection.openConnection();
         List<Catalog> listCatalogs = DAOFactory.getCatalogsDAO().getAllCatalogs();
 
-        mAdapter = new SelectableRecyclerViewAdapter(this, listCatalogs);
+        mAdapter = new SelectableRecyclerViewAdapterForCatalogs(this, listCatalogs);
 
-        final RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(getDisplayColumns(mContext), StaggeredGridLayoutManager.VERTICAL));
+        mAdapter.getSelectionHelper().registerHolderClickObserver(this);
+
+        mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(RecyclerViewConfiguration.getDisplayColumns(mContext), StaggeredGridLayoutManager.VERTICAL));
 
         RecyclerView.ItemAnimator itemAnimator = new DefaultItemAnimator();
-        recyclerView.setItemAnimator(itemAnimator);
-        recyclerView.setAdapter(mAdapter);
+        mRecyclerView.setItemAnimator(itemAnimator);
+        mRecyclerView.setAdapter(mAdapter);
 
         int[] imageSize = mAdapter.getImageSize();
         mImageHeight = imageSize[0];
         mImageWidth = imageSize[1];
 
-        Log.d("AddCatalogFragment", "hash Code CatalogsViewFragment fragments: " + this.hashCode());
+        mFab.setOnClickListener(new View.OnClickListener() {
 
-        if (savedInstanceState != null) {
-            isHasChildrenFragments = savedInstanceState.getBoolean(bundleArgKey);
+            @Override
+            public void onClick(View view) {
 
-            if (isHasChildrenFragments) {
-                setVisible(false);
-            } else {
-                setVisible(true);
+                Log.d(LOG_TAG, "FAB onClick");
+
+                FragmentManager fragmentManager = getChildFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+                AddCatalogFragment addFragment = new AddCatalogFragment();
+                Bundle args = new Bundle();
+                args.putInt(bundleArgsKeysImageSize[0], mImageHeight);
+                args.putInt(bundleArgsKeysImageSize[1], mImageWidth);
+                addFragment.setArguments(args);
+
+                final String currentOperationTag = AddCatalogFragment.class.getName();
+
+                fragmentTransaction.add(R.id.fragment_child_layout, addFragment, currentOperationTag);
+
+                fragmentTransaction.addToBackStack(currentOperationTag);
+                int result = fragmentTransaction.commit();
+
+                if (result >= 0) {
+                    addFragment.setAddCatalogEventListener(CatalogsViewFragment.this);
+                } else {
+                    Toast.makeText(mContext, Constants.MESSAGE_ERROR_RUN_FRAGMENT, Toast.LENGTH_SHORT).show();
+                }
+
+
             }
-        }
 
-        final FragmentManager fragmentManager = getChildFragmentManager();
-        fragmentManager.addOnBackStackChangedListener(this);
-
-    }
-
-    @Override
-    public void onBackStackChanged() {
-
-        Log.d(LOG_TAG, "onBackStackChanged");
-
-        FragmentManager fragmentManager = getChildFragmentManager();
-        if (fragmentManager.getBackStackEntryCount() > 0) {
-            setVisible(false);
-            isHasChildrenFragments = true;
-        } else {
-            setVisible(true);
-            isHasChildrenFragments = false;
-        }
-
-    }
-
-//        OrientationEventListener orientationEventListener = new OrientationEventListener(getContext(), SensorManager.SENSOR_DELAY_NORMAL) {
-//            @Override
-//            public void onOrientationChanged(int orientation) {
-////                recyclerView.VISIBLE(View.GONE);
-//                Log.d(LOG_TAG, "orientation changed");
-//            }
-//        };
-//
-//        orientationEventListener.enable();
+        });
 
 
-//    @Override
-//    public void onConfigurationChanged(Configuration newConfig) {
-//        super.onConfigurationChanged(newConfig);
-//
-//        Log.d(LOG_TAG, "onConfigurationChanged");
-//
-//        switch(newConfig.orientation){
-//            case Configuration.ORIENTATION_PORTRAIT:
-//                break;
-//
-//            case Configuration.ORIENTATION_LANDSCAPE:
-//                break;
-//        }
-//    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putBoolean(bundleArgKey, isHasChildrenFragments);
     }
 
     @Override
     public void onPause() {
+        mAdapter.getSelectionHelper().unregisterHolderClickObserver(this);
         DatabaseConnection.closeConnection();
-        getChildFragmentManager().removeOnBackStackChangedListener(this);
         super.onPause();
 
-    }
-
-    @Override
-    public void onResume() {
-        DatabaseConnection.openConnection();
-        super.onResume();
-        Log.d("Fragment", "onResume");
-    }
-
-    public int[] getImageSize() {
-        return new int[]{mImageHeight, mImageWidth};
     }
 
     public void startActionMode() {
@@ -231,18 +183,53 @@ public class CatalogsViewFragment extends Fragment
         Log.d(LOG_TAG, "setVisible");
 
         if (visible) {
-            recyclerView.setVisibility(View.VISIBLE);
+            mRecyclerView.setVisibility(View.VISIBLE);
+            mFab.setVisibility(View.VISIBLE);
+
+            mRecyclerView.invalidate();
+            mFab.invalidate();
+
         } else {
-            recyclerView.setVisibility(View.GONE);
+            mRecyclerView.setVisibility(View.GONE);
+            mFab.setVisibility(View.GONE);
         }
-
-
     }
 
-    public void setFlagHasChildrenFragments(boolean flag) {
-        isHasChildrenFragments = flag;
+
+    public void onHolderClick(RecyclerView.ViewHolder viewHolder) {
+        int adapterPosition = viewHolder.getAdapterPosition();
+        Catalog itemCatalog = mAdapter.getElement(adapterPosition);
+
+        openCatalog(itemCatalog);
     }
 
+    public boolean onHolderLongClick(RecyclerView.ViewHolder viewHolder) {
+        return false;
+    }
+
+    private void openCatalog(Catalog openedCatalog) {
+
+        FragmentManager fragmentManager = getChildFragmentManager();
+        WordsViewFragment wordsFragment = new WordsViewFragment();
+
+        Bundle args = new Bundle();
+        args.putSerializable(bundleArgsKeyForWordsView, openedCatalog);
+        wordsFragment.setArguments(args);
+
+//        int result = FragmentHelper.addFragmentInStack(fragmentManager, wordsFragment, R.id.fragment_child_layout);
+
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        final String operationTag = WordsViewFragment.class.getName();
+
+        fragmentTransaction.add(R.id.fragment_child_layout, wordsFragment, operationTag);
+        fragmentTransaction.addToBackStack(operationTag);
+        int result = fragmentTransaction.commit();
+
+        if (result < 0) {
+            Toast.makeText(getContext(), Constants.MESSAGE_ERROR_RUN_FRAGMENT, Toast.LENGTH_SHORT).show();
+        }
+    }
 
     public ActionMode getActionMode() {
         return mActionMode;
@@ -315,25 +302,23 @@ public class CatalogsViewFragment extends Fragment
                         EditCatalogFragment editCatalogFragment = new EditCatalogFragment();
 
                         Bundle args = new Bundle();
-                        args.putSerializable(bundleArgsKeysForEditCatalogs[0], editElement);
-                        args.putInt(bundleArgsKeysForEditCatalogs[1], mImageHeight);
-                        args.putInt(bundleArgsKeysForEditCatalogs[2], mImageWidth);
+                        args.putSerializable(bundleArgsKeyForEditCatalogObject, editElement);
+                        args.putInt(bundleArgsKeysImageSize[0], mImageHeight);
+                        args.putInt(bundleArgsKeysImageSize[1], mImageWidth);
 
                         editCatalogFragment.setArguments(args);
 
-                        fragmentTransaction.add(R.id.parent_for_children_fragments, editCatalogFragment, currentOperationTag);
+//                        fragmentTransaction.add(R.id.fragment_parent_layout, editCatalogFragment, currentOperationTag);
+                        fragmentTransaction.add(R.id.fragment_child_layout, editCatalogFragment, currentOperationTag);
 
                         fragmentTransaction.addToBackStack(currentOperationTag);
                         int result = fragmentTransaction.commit();
 
                         if (result >= 0) {
-                            CatalogsViewFragment.this.setVisible(false);
-                            isHasChildrenFragments = true;
+                            editCatalogFragment.setEditCatalogEventListener(CatalogsViewFragment.this);
                         } else {
                             Toast.makeText(getContext(), Constants.MESSAGE_ERROR_RUN_FRAGMENT, Toast.LENGTH_SHORT).show();
                         }
-
-                        editCatalogFragment.setEditCatalogEventListener(CatalogsViewFragment.this);
 
 
                     }

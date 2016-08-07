@@ -1,6 +1,7 @@
 package com.training.startandroid.trapp.util;
 
 
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -19,6 +20,11 @@ public class ImageFetcher {
     private static ImageCache mImageCache;
     private boolean mExitTasksEarly = false;
     private boolean mPauseWork = false;
+
+    public ImageFetcher(Fragment fragment) {
+        FragmentManager fragmentManager = FragmentHelper.getLowLevelFragmentManager(fragment);
+        mImageCache = ImageCache.getInstance(fragmentManager);
+    }
 
     public ImageFetcher(FragmentManager fragmentManager) {
         mImageCache = ImageCache.getInstance(fragmentManager);
@@ -177,7 +183,7 @@ public class ImageFetcher {
                 if (imageView != null && bitmap != null) {
                     Log.d(LOG_TAG, "setBitmap");
                     imageView.setImageBitmap(bitmap);
-                    
+
                     Log.d(LOG_TAG, "height: " + imageView.getHeight());
                     Log.d(LOG_TAG, "width: " + imageView.getWidth());
 

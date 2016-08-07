@@ -13,17 +13,14 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
 
-import com.training.startandroid.trapp.ui.CatalogsViewFragment;
-
-import java.lang.reflect.Method;
-import java.util.List;
-
 public class FragmentHelper {
 
     private static final String LOG_TAG = FragmentHelper.class.getSimpleName();
 
 
-    public static boolean addFragmentInStack(FragmentManager fragmentManager, Fragment addFragment, Integer containerViewId) {
+    public static int addFragmentInStack(FragmentManager fragmentManager, Fragment addFragment, Integer containerViewId) {
+
+        int result = -1;
 
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         Fragment currentFragment = getHigherFragmentInStack(fragmentManager);
@@ -41,13 +38,9 @@ public class FragmentHelper {
                 fragmentTransaction.add(addFragment, currentOperationTag);
             }
             fragmentTransaction.addToBackStack(currentOperationTag);
-            fragmentTransaction.commit();
-
-            return true;
-        } else {
-            return false;
-
+            result = fragmentTransaction.commit();
         }
+        return result;
     }
 
     public static Fragment getHigherFragmentInStack(FragmentManager fragmentManager) {
@@ -91,34 +84,16 @@ public class FragmentHelper {
         }
 
         return null;
-//        Fragment previousFragment = null;
-//        int countFragments = fragmentManager.getBackStackEntryCount();
-//
-//        if (countFragments > 1) {
-//
-//            final String tagHigherFragment = fragmentManager.getBackStackEntryAt(countFragments - 1).getName();
-//            Fragment higherFragment = fragmentManager.findFragmentByTag(tagHigherFragment);
-//
-//            Fragment childPreviousFragment = getPreviousFragmentInBackStack(higherFragment.getChildFragmentManager());
-//
-//            if (childPreviousFragment != null) {
-//                higherFragment = childPreviousFragment;
-//            }
-//
-//            final String tagPrevious = fragmentManager.getBackStackEntryAt(countFragments - 2).getName();
-//            previousFragment = fragmentManager.findFragmentByTag(tagPrevious);
-//        }
-//        return previousFragment;
     }
 
-    public static void getBackPreviousFragment(Fragment currentFragment, Fragment previousFragment, FragmentManager fragmentManager) {
+    public static void comeBack2PreviousFragment(Fragment currentFragment, Fragment previousFragment, FragmentManager fragmentManager) {
 
         try {
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
             if (currentFragment != null) {
                 Fragment parentFragment = currentFragment.getParentFragment();
-                fragmentTransaction.remove(currentFragment);
+//                fragmentTransaction.remove(currentFragment);
 
                 if (previousFragment != null) {
 
@@ -126,26 +101,26 @@ public class FragmentHelper {
 
 //                          Using reflection in Java for invoking method setVisible(boolean)
 
-                        Method methodSetVisibleView = parentFragment.getClass().getMethod("setVisible", new Class[]{boolean.class});
-                        methodSetVisibleView.invoke(parentFragment, true);
+//                        Method methodSetVisibleView = parentFragment.getClass().getMethod("setVisible", new Class[]{boolean.class});
+//                        methodSetVisibleView.invoke(parentFragment, true);
+
+                        FragmentManager childFragmentManager = parentFragment.getChildFragmentManager();
+                        FragmentTransaction childFragmentTransaction = childFragmentManager.beginTransaction();
+
+                        childFragmentManager.popBackStackImmediate();
+                        childFragmentTransaction.commit();
 
                     } else {
                         fragmentTransaction.show(previousFragment);
+                        fragmentManager.popBackStackImmediate();
                     }
                 }
 
             }
 
 //            fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-
-            fragmentManager.popBackStackImmediate();
             fragmentTransaction.commit();
-
             Log.d("CatalogsView", "Done");
-
-
-            int testCount = fragmentManager.getBackStackEntryCount();
-            List<Fragment> listFragments = fragmentManager.getFragments();
 
         } catch (Exception ex) {
             Log.e("CatalogsViewFragment", ex.toString());
@@ -163,5 +138,15 @@ public class FragmentHelper {
 
     }
 
+    public static FragmentManager getLowLevelFragmentManager(Fragment fragment) {
+
+        Fragment parentFragment = fragment.getParentFragment();
+
+        if (parentFragment != null) {
+            return getLowLevelFragmentManager(parentFragment);
+        }
+        return fragment.getFragmentManager();
+
+    }
 
 }
