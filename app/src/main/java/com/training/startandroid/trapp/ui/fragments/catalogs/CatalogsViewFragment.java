@@ -33,7 +33,6 @@ import com.training.startandroid.trapp.ui.selection.SelectionHelper;
 import com.training.startandroid.trapp.ui.selection.SelectionObserver;
 import com.training.startandroid.trapp.ui.fragments.words.WordsViewFragment;
 import com.training.startandroid.trapp.util.Constants;
-import com.training.startandroid.trapp.util.FragmentHelper;
 import com.training.startandroid.trapp.util.RecyclerViewConfiguration;
 
 import java.util.Date;
@@ -50,7 +49,6 @@ public class CatalogsViewFragment extends Fragment
 
     private final String bundleArgsKeyForEditCatalogObject = "editCatalog";
     private final String bundleArgsKeyForWordsView = "openedCatalog";
-    private final String bundleArgKey = "isHasChildrenFragments";
 
     private final ActionModeCallback mActionModeCallback = new ActionModeCallback();
     private SelectableRecyclerViewAdapterForCatalogs mAdapter;
@@ -308,7 +306,6 @@ public class CatalogsViewFragment extends Fragment
 
                         editCatalogFragment.setArguments(args);
 
-//                        fragmentTransaction.add(R.id.fragment_parent_layout, editCatalogFragment, currentOperationTag);
                         fragmentTransaction.add(R.id.fragment_child_layout, editCatalogFragment, currentOperationTag);
 
                         fragmentTransaction.addToBackStack(currentOperationTag);

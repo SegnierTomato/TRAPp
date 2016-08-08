@@ -1,0 +1,344 @@
+------------------------------------------------------
+-- Create tables for catalogs and words 
+------------------------------------------------------
+
+DROP TABLE IF EXISTS catalogs;
+
+CREATE TABLE catalogs (
+id_catalog INTEGER PRIMARY KEY AUTOINCREMENT , 
+name TEXT NOT NULL COLLATE NOCASE, 
+created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP TABLE IF EXISTS words;
+
+CREATE TABLE words (
+id_word INTEGER PRIMARY KEY AUTOINCREMENT, 
+word TEXT NOT NULL COLLATE NOCASE, 
+created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP TABLE IF EXISTS catalogs_and_words_relations;
+
+CREATE TABLE catalogs_and_words_relations (
+id_catalog INTEGER NOT NULL,
+id_word INTEGER NOT NULL,
+PRIMARY KEY (id_catalog, id_word),
+FOREIGN KEY (id_catalog) REFERENCES catalogs(id_catalog)
+ON DELETE CASCADE
+ON UPDATE NO ACTION,
+FOREIGN KEY (id_word) REFERENCES words(id_word)
+ON DELETE CASCADE
+ON UPDATE NO ACTION
+);
+
+DROP TABLE IF EXISTS catalog_image;
+
+CREATE TABLE catalog_image(
+id_catalog INTEGER PRIMARY KEY NOT NULL,
+image_path TEXT NOT NULL COLLATE NOCASE,
+FOREIGN KEY (id_catalog) REFERENCES catalogs(id_catalog)
+ON DELETE CASCADE
+ON UPDATE NO ACTION
+);
+
+DROP TABLE IF EXISTS word_image;
+
+CREATE TABLE word_image(
+id_word INTEGER PRIMARY KEY NOT NULL,
+image_path TEXT NOT NULL COLLATE NOCASE,
+FOREIGN KEY (id_word) REFERENCES words(id_word)
+ON DELETE CASCADE
+ON UPDATE NO ACTION
+);
+
+DROP TABLE IF EXISTS word_sound;
+
+CREATE TABLE word_sound(
+id_word INTEGER PRIMARY KEY NOT NULL,
+sound_path TEXT NOT NULL COLLATE NOCASE,
+FOREIGN KEY (id_word) REFERENCES words(id_word)
+ON DELETE CASCADE
+ON UPDATE NO ACTION
+);
+
+
+------------------------------------------------------
+-- Create tables for translate word
+------------------------------------------------------
+
+DROP TABLE IF EXISTS translate_words;
+
+CREATE TABLE translate_words (
+id_translate INTEGER PRIMARY KEY AUTOINCREMENT,
+translate_word TEXT NOT NULL COLLATE NOCASE,
+part_of_speech TEXT COLLATE NOCASE,
+created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+DROP TABLE IF EXISTS google_translate;
+
+CREATE TABLE google_translate (
+id_word INTEGER NOT NULL,
+id_translate INTEGER NOT NULL,
+PRIMARY KEY (id_word, id_translate),
+FOREIGN KEY (id_word) REFERENCES words(id_word)
+ON DELETE CASCADE
+ON UPDATE CASCADE,
+FOREIGN KEY (id_translate) REFERENCES translate_words(id_translate)
+ON DELETE CASCADE
+ON UPDATE NO ACTION
+);
+
+DROP TABLE IF EXISTS yandex_translate;
+
+CREATE TABLE yandex_translate (
+id_word INTEGER NOT NULL,
+id_translate INTEGER NOT NULL,
+PRIMARY KEY (id_word, id_translate),
+FOREIGN KEY (id_word) REFERENCES words(id_word)
+ON DELETE CASCADE
+ON UPDATE CASCADE,
+FOREIGN KEY (id_translate) REFERENCES translate_words(id_translate)
+ON DELETE CASCADE
+ON UPDATE NO ACTION
+);
+
+DROP TABLE IF EXISTS custom_translate;
+
+CREATE TABLE custom_translate (
+id_word INTEGER NOT NULL,
+id_translate INTEGER NOT NULL,
+PRIMARY KEY (id_word, id_translate),
+FOREIGN KEY (id_word) REFERENCES words(id_word)
+ON DELETE CASCADE
+ON UPDATE CASCADE,
+FOREIGN KEY (id_translate) REFERENCES translate_words(id_translate)
+ON DELETE CASCADE
+ON UPDATE NO ACTION
+);
+
+------------------------------------------------------
+-- Triggers for words
+------------------------------------------------------
+    
+DROP TRIGGER IF EXISTS delete_free_word;
+
+CREATE TRIGGER delete_free_word
+  BEFORE DELETE
+  ON catalogs_and_words_relations FOR EACH ROW
+  WHEN (SELECT COUNT(id_word) FROM catalogs_and_words_relations WHERE OLD.id_word = catalogs_and_words_relations.id_word) = 1
+BEGIN
+	DELETE FROM words WHERE words.id_word = OLD.id_word;
+END;
+
+
+/*
+DROP TRIGGER IF EXISTS update_word_relation;
+
+CREATE TRIGGER update_word_relation
+  AFTER UPDATE
+  ON catalogs_and_words_relations FOR EACH ROW
+  WHEN (SELECT COUNT(id_word) FROM catalogs_and_words_relations WHERE OLD.id_word = catalogs_and_words_relations.id_word) =0
+BEGIN
+	DELETE FROM words WHERE words.id_word = OLD.id_word;
+END;
+*/
+
+
+------------------------------------------------------
+-- Triggers for translations
+------------------------------------------------------
+
+
+DROP TRIGGER IF EXISTS delete_free_translation_for_google_translate;
+
+CREATE TRIGGER delete_free_translation_for_google_translate
+	BEFORE DELETE
+	ON google_translate FOR EACH ROW
+	WHEN 
+	
+	(SELECT COUNT (id_translate) FROM
+       (
+       SELECT id_word, id_translate FROM google_translate WHERE google_translate.id_translate = OLD.id_translate 
+       UNION ALL
+            SELECT id_word, id_translate FROM yandex_translate WHERE yandex_translate.id_translate = OLD.id_translate 
+            UNION ALL
+                 SELECT id_word, id_translate FROM custom_translate WHERE custom_translate.id_translate = OLD.id_translate 
+                                                                                                             )) = 1
+	
+BEGIN
+	DELETE FROM translate_words WHERE translate_words.id_translate = OLD.id_translate;
+END;
+
+
+DROP TRIGGER IF EXISTS delete_free_translation_for_custom_translate;
+
+CREATE TRIGGER delete_free_translation_for_custom_translate
+	BEFORE DELETE
+	ON custom_translate FOR EACH ROW
+	WHEN 
+	
+	(SELECT COUNT (id_translate) FROM
+       (
+       SELECT id_word, id_translate FROM google_translate WHERE google_translate.id_translate = OLD.id_translate 
+       UNION ALL
+            SELECT id_word, id_translate FROM yandex_translate WHERE yandex_translate.id_translate = OLD.id_translate 
+            UNION ALL
+                 SELECT id_word, id_translate FROM custom_translate WHERE custom_translate.id_translate = OLD.id_translate 
+                                                                                                             )) = 1
+
+BEGIN
+	DELETE FROM translate_words WHERE translate_words.id_translate = OLD.id_translate;
+END;
+
+
+DROP TRIGGER IF EXISTS delete_free_translation_for_yandex_translate;
+
+CREATE TRIGGER delete_free_translation_for_yandex_translate
+	BEFORE DELETE
+	ON yandex_translate FOR EACH ROW
+	WHEN 
+	
+	(SELECT COUNT (id_translate) FROM
+       (
+       SELECT id_word, id_translate FROM google_translate WHERE google_translate.id_translate = OLD.id_translate 
+       UNION ALL
+            SELECT id_word, id_translate FROM yandex_translate WHERE yandex_translate.id_translate = OLD.id_translate 
+            UNION ALL 
+                 SELECT id_word, id_translate FROM custom_translate WHERE custom_translate.id_translate = OLD.id_translate 
+                                                                                                             )) = 1
+BEGIN
+	DELETE FROM translate_words WHERE translate_words.id_translate = OLD.id_translate;
+END;
+
+
+
+
+------------------------------------------------------
+-- Insert data in tables
+------------------------------------------------------
+BEGIN TRANSACTION;
+
+INSERT INTO catalogs (name) VALUES ('Действия');
+INSERT INTO catalogs (name) VALUES ('Структура Города');
+INSERT INTO catalogs (name) VALUES ('Города');
+INSERT INTO catalogs (name) VALUES ('Часто используемые слова');
+INSERT INTO catalogs (name) VALUES ('Временный каталог');
+
+
+INSERT INTO words (word) VALUES ('action');
+INSERT INTO words (word) VALUES ('walk, run, sleep');
+INSERT INTO words (word) VALUES ('sleep');
+
+INSERT INTO words (word) VALUES ('city');
+INSERT INTO words (word) VALUES ('city, street');
+INSERT INTO words (word) VALUES ('parking');
+INSERT INTO words (word) VALUES ('region');
+INSERT INTO words (word) VALUES ('city area');
+INSERT INTO words (word) VALUES ('street');
+
+
+INSERT INTO words (word) VALUES ('New-York');
+INSERT INTO words (word) VALUES ('Washington');
+INSERT INTO words (word) VALUES ('Chicago');
+INSERT INTO words (word) VALUES ('California, San Francisco');
+INSERT INTO words (word) VALUES ('San Francisco');
+INSERT INTO words (word) VALUES ('Sacramento');
+INSERT INTO words (word) VALUES ('Los Angeles');
+
+INSERT INTO words (word) VALUES ('USA Cities');
+
+INSERT INTO words (word) VALUES ('templates patterns');
+
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (1,1);
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (1,2);
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (1,3);
+
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (2,4);
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (2,5);
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (2,6);
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (2,7);
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (2,8);
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (2,9);
+
+
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (3,10);
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (3,11);
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (3,12);
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (3,13);
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (3,14);
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (3,15);
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (3,16);
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (4,17);
+
+INSERT INTO catalogs_and_words_relations (id_catalog, id_word) VALUES (5,18);
+
+
+
+INSERT INTO translate_words (translate_word, part_of_speech) VALUES ('Идти','гл.');
+INSERT INTO translate_words (translate_word, part_of_speech) VALUES ('Спать','гл.');
+INSERT INTO translate_words (translate_word, part_of_speech) VALUES ('Бежать','гл.');
+
+INSERT INTO translate_words (translate_word, part_of_speech) VALUES ('город','сущ.');
+INSERT INTO translate_words (translate_word) VALUES ('парковка');
+INSERT INTO translate_words (translate_word) VALUES ('район');
+INSERT INTO translate_words (translate_word) VALUES ('область');
+INSERT INTO translate_words (translate_word, part_of_speech) VALUES ('улица','сущ.');
+
+
+INSERT INTO translate_words (translate_word, part_of_speech) VALUES ('Нью-Йорк','сущ.');
+INSERT INTO translate_words (translate_word, part_of_speech) VALUES ('Вашингтон','сущ.');
+INSERT INTO translate_words (translate_word, part_of_speech) VALUES ('Чикаго','сущ.');
+INSERT INTO translate_words (translate_word, part_of_speech) VALUES ('Сан-Франциско','сущ.');
+INSERT INTO translate_words (translate_word, part_of_speech) VALUES ('Калифорния','сущ.');
+INSERT INTO translate_words (translate_word, part_of_speech) VALUES ('Сакраменто','сущ.');
+INSERT INTO translate_words (translate_word, part_of_speech) VALUES ('Лос Анджелес','сущ.');
+
+
+
+INSERT INTO google_translate (id_word, id_translate) VALUES (1,1);
+INSERT INTO google_translate (id_word, id_translate) VALUES (1,2);
+INSERT INTO google_translate (id_word, id_translate) VALUES (1,3);
+INSERT INTO google_translate (id_word, id_translate) VALUES (2,1);
+INSERT INTO google_translate (id_word, id_translate) VALUES (2,2);
+INSERT INTO google_translate (id_word, id_translate) VALUES (2,3);
+INSERT INTO google_translate (id_word, id_translate) VALUES (3,2);
+
+INSERT INTO google_translate (id_word, id_translate) VALUES (4,4);
+INSERT INTO google_translate (id_word, id_translate) VALUES (5,4);
+INSERT INTO google_translate (id_word, id_translate) VALUES (5,8);
+INSERT INTO google_translate (id_word, id_translate) VALUES (6,5);
+INSERT INTO google_translate (id_word, id_translate) VALUES (8,6);
+INSERT INTO google_translate (id_word, id_translate) VALUES (7,7);
+INSERT INTO google_translate (id_word, id_translate) VALUES (9,8);
+
+INSERT INTO google_translate (id_word, id_translate) VALUES (10,9);
+INSERT INTO google_translate (id_word, id_translate) VALUES (11,10);
+INSERT INTO google_translate (id_word, id_translate) VALUES (12,11);
+INSERT INTO google_translate (id_word, id_translate) VALUES (13,12);
+INSERT INTO google_translate (id_word, id_translate) VALUES (13,13);
+INSERT INTO google_translate (id_word, id_translate) VALUES (14,13);
+INSERT INTO google_translate (id_word, id_translate) VALUES (15,14);
+
+INSERT INTO google_translate (id_word, id_translate) VALUES (16,15);
+INSERT INTO google_translate (id_word, id_translate) VALUES (17,13);
+INSERT INTO google_translate (id_word, id_translate) VALUES (17,14);
+
+INSERT INTO yandex_translate (id_word, id_translate) VALUES (17,9);
+INSERT INTO yandex_translate (id_word, id_translate) VALUES (17,10);
+INSERT INTO yandex_translate (id_word, id_translate) VALUES (17,11);
+INSERT INTO yandex_translate (id_word, id_translate) VALUES (17,12);
+INSERT INTO yandex_translate (id_word, id_translate) VALUES (17,13);
+INSERT INTO yandex_translate (id_word, id_translate) VALUES (17,14);
+
+INSERT INTO custom_translate (id_word, id_translate) VALUES (17,13);
+INSERT INTO custom_translate (id_word, id_translate) VALUES (17,14);
+
+END TRANSACTION;
+
+
+
+
+
+

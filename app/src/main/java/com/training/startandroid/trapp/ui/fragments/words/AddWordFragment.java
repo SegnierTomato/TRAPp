@@ -18,10 +18,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.view.ActionMode;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,8 +34,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.doodle.android.chips.ChipsView;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.training.startandroid.trapp.R;
 import com.training.startandroid.trapp.model.Word;
+import com.training.startandroid.trapp.ui.MainActivity;
 import com.training.startandroid.trapp.ui.fragments.NestedFragmentIteraction;
 import com.training.startandroid.trapp.util.Constants;
 import com.training.startandroid.trapp.util.ImageFetcher;
@@ -49,24 +56,22 @@ public class AddWordFragment extends Fragment
     private final String[] bundleForTabAdapterArgsKey = {"typeTranslation", "word"};
 
     private final String[] mTitleFragmentTabs = {"All", "Google", "Yandex", "Custom"};
-
+    private final ActionModeCallback mActionModeCallback = new ActionModeCallback();
+    private int SELECT_PHOTO = 1;
     private int mImageHeight;
     private int mImageWidth;
-
     private ImageView mWordImage;
     private TextInputLayout mInputLayout;
     private EditText mEditText;
-
     private Button mAddButton;
     private FloatingActionButton mRemoveFab;
-
-    private int SELECT_PHOTO = 1;
-
+    private SlidingUpPanelLayout mSlidingLayout;
+    private ChipsView mChipsViewTranslation;
     private ImageFetcher mImageFetcher;
-
-    private AddWordEventListener mAddEventListener;
-
     private String mImagePath;
+    private AddWordEventListener mAddEventListener;
+    private ActionMode mActionMode;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -99,8 +104,8 @@ public class AddWordFragment extends Fragment
 
         mEditText.addTextChangedListener(new WordTextWatcher());
 
-        mAddButton = (Button) view.findViewById(R.id.add_edit_word_add_button);
-        mAddButton.setOnClickListener(this);
+//        mAddButton = (Button) view.findViewById(R.id.add_edit_word_add_button);
+//        mAddButton.setOnClickListener(this);
 
         mRemoveFab = (FloatingActionButton) view.findViewById(R.id.add_edit_word_remove_fab);
         mRemoveFab.setOnClickListener(this);
@@ -113,6 +118,30 @@ public class AddWordFragment extends Fragment
         TabLayout tabLayout = (TabLayout) view.findViewById(R.id.add_edit_word_tabs);
         tabLayout.setupWithViewPager(viewPager);
         tabLayout.setEnabled(false);
+
+        mChipsViewTranslation = (ChipsView) view.findViewById(R.id.add_edit_word_chips_view_translation);
+        mChipsViewTranslation.setChipsListener(new ChipsView.ChipsListener() {
+
+            @Override
+            public void onChipAdded(ChipsView.Chip chip) {
+
+            }
+
+            @Override
+            public void onChipDeleted(ChipsView.Chip chip) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence text) {
+
+            }
+        });
+
+        mSlidingLayout = (SlidingUpPanelLayout) view.findViewById(R.id.add_edit_word_sliding_layout);
+        mSlidingLayout.setDragView(R.id.add_edit_word_viewpager);
+
+        mSlidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
 
         return view;
     }
@@ -130,7 +159,9 @@ public class AddWordFragment extends Fragment
             mAddEventListener = (WordsViewFragment) getParentFragment();
         }
 
+
         notifyParent2ChildState(true);
+        startActionMode();
     }
 
     @Override
@@ -153,6 +184,20 @@ public class AddWordFragment extends Fragment
     public void onDestroy() {
         notifyParent2ChildState(false);
         super.onDestroy();
+    }
+
+    private void startActionMode() {
+        MainActivity activity = (MainActivity) getActivity();
+        mActionMode = activity.startSupportActionMode(mActionModeCallback);
+
+        ActionBar actionBar = activity.getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(false);
+        actionBar.setHomeButtonEnabled(false);
+        actionBar.setDisplayShowHomeEnabled(false);
+
+        if(actionBar!=null){
+
+        }
     }
 
     private FragmentPagerAdapter initViewPageAdapter(FragmentManager fragmentManager) {
@@ -192,8 +237,14 @@ public class AddWordFragment extends Fragment
                 mImagePath = null;
                 break;
 
-//            case :
-//            break;
+//            case R.id.add_edit_word_add_button:
+//                if (mSlidingLayout.getPanelState() == SlidingUpPanelLayout.PanelState.HIDDEN) {
+//
+//                    mSlidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+//                } else {
+//                    mSlidingLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+//                }
+//                break;
         }
     }
 
@@ -312,6 +363,33 @@ public class AddWordFragment extends Fragment
             } else {
                 mInputLayout.setErrorEnabled(false);
             }
+        }
+    }
+
+    private class ActionModeCallback implements ActionMode.Callback {
+
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            return false;
+        }
+
+        @Override
+        public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+            mActionMode = actionMode;
+            mActionMode.getMenuInflater().inflate(R.menu.add_edit_word, menu);
+
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+
         }
     }
 
